@@ -12,8 +12,8 @@ export default function Navbar() {
           ProLearn
         </span>
         <div className='select-none uppercase text-center tracking-widest text-[0.55rem] -mt-1 font-normal text-indigo-300'>
-              <span className='font-semibold text-[#98bfff]'>Pro</span>fessional 
-              <span className='font-semibold text-[#98bfff]'> Learn</span>ing 
+              <span className='font-bold text-[#98bfff]'>Pro</span>fessional 
+              <span className='font-bold text-[#98bfff]'> Learn</span>ing 
             </div>
       </Link>
           {/* Desktop Menu */}
