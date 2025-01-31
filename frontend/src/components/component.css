@@ -1,0 +1,11 @@
+/* Logo Gradient */
+.logo-gradient {
+  background: linear-gradient(135deg, #7c9fff, #5d8cff, #a2b9ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 12px rgba(124, 159, 255, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  -webkit-user-select: none;
+  user-select: none;
+}
