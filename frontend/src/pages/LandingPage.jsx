@@ -44,7 +44,7 @@ function Hero() {
         <p className="text-xl text-gray-400 mb-8 font-poppins">
           Adaptive content, smart study plans, and collaborative tools — all tailored for you.
         </p>
-        <div className="flex sm:flex-row flex-col justify-center items-center space-x-0 sm:space-y-0 space-y-1 sm:space-x-1 font-poppin">
+        <div className="flex sm:flex-row flex-col justify-center items-center space-x-0 sm:space-y-0 space-y-2 sm:space-x-2 font-poppin">
           <Link 
             to="/signup" 
             className="sm:max-w-auto max-w-48 bg-indigo-600 text-white px-8 py-3 rounded-lg text-lg hover:bg-indigo-700 transition-colors"

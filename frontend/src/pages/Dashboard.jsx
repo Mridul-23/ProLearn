@@ -56,19 +56,8 @@ const CHART_COLORS = {
 };
 
 const Dashboard = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [activeMenu, setActiveMenu] = useState('dashboard');
   const [timeRange, setTimeRange] = useState('weekly');
 
-  // Navigation Items
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: <FiHome /> },
-    { id: 'study-plan', label: 'Study Plan', icon: <FiBook /> },
-    { id: 'collaborate', label: 'Collaborate', icon: <FiUsers /> },
-    { id: 'resources', label: 'Resources', icon: <FiStar /> },
-    { id: 'chat', label: 'AI Tutor', icon: <FiMessageSquare /> },
-    { id: 'schedule', label: 'Schedule', icon: <FiCalendar /> }
-  ];
 
   // Chart Data
   const engagementData = {
@@ -122,98 +111,11 @@ const Dashboard = () => {
 
   return (
     <div className="flex min-h-screen font-mon" style={{ backgroundColor: THEME.bg.primary }}>
-      {/* Sidebar */}
-      <aside 
-        className={`transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-20'}`}
-        style={{ backgroundColor: THEME.bg.secondary }}
-      >
-        <div className="flex flex-col h-full p-4 border-r border-slate-700/50">
-          {/* Sidebar Header */}
-          <div className="flex items-center justify-between mb-8 p-2">
-            {isSidebarOpen ? (
-              <span 
-                className="text-xl font-bold"
-                style={{ color: THEME.text.accent }}
-              >
-                ToolBox
-              </span>
-            ) : (
-              <div className="w-6 h-6 rounded-full" style={{ backgroundColor: THEME.text.accent }} />
-            )}
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="p-2 hover:bg-slate-700/30 rounded-lg"
-              style={{ color: THEME.text.primary }}
-            >
-              {isSidebarOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
-            </button>
-          </div>
-
-          {/* Navigation */}
-          <div className="flex-1">
-            <ul className="space-y-2">
-              {menuItems.map((item) => (
-                <li key={item.id}>
-                  <button
-                    onClick={() => setActiveMenu(item.id)}
-                    className={`w-full flex items-center p-3 rounded-lg transition-colors ${
-                      activeMenu === item.id ? 'bg-indigo-500/50 border-[1px] border-indigo-500' : 'hover:bg-slate-700/20'
-                    }`}
-                    style={{ color: THEME.text.primary }}
-                  >
-                    <span className="text-xl">{item.icon}</span>
-                    {isSidebarOpen && (
-                      <span className="ml-3 text-sm">{item.label}</span>
-                    )}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </aside>
 
       {/* Main Content */}
       <div className="flex-1 p-8 overflow-x-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 
-              className="text-2xl font-bold mb-2"
-              style={{ color: THEME.text.primary }}
-            >
-              {menuItems.find(m => m.id === activeMenu)?.label}
-            </h1>
-            <p className="text-sm" style={{ color: THEME.text.secondary }}>
-              <FiClock className="inline mr-2" />
-              {new Date().toLocaleDateString('en-US', { 
-                weekday: 'long', 
-                month: 'long', 
-                day: 'numeric' 
-              })}
-            </p>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p style={{ color: THEME.text.primary }}>Mridul Narula</p>
-              <p className="text-sm" style={{ color: THEME.text.secondary }}>
-                Learning Level: Advanced
-              </p>
-            </div>
-            <div 
-              className="w-10 h-10 rounded-full flex items-center justify-center"
-              style={{ 
-                backgroundColor: THEME.bg.accent,
-                color: THEME.text.primary
-              }}
-            >
-              <FiUser />
-            </div>
-          </div>
-        </div>
 
         {/* Dashboard Content */}
-        {activeMenu === 'dashboard' && (
           <div className="space-y-8">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -422,7 +324,6 @@ const Dashboard = () => {
               </div>
             </div>
           </div>
-        )}
       </div>
     </div>
   );
