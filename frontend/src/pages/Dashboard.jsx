@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import api from '../utils/api';
 import { Line, Bar, Doughnut } from 'react-chartjs-2';
 import {
   FiHome, FiBook, FiCalendar, FiMessageSquare,
@@ -57,14 +58,27 @@ const CHART_COLORS = {
 
 const Dashboard = () => {
   const [timeRange, setTimeRange] = useState('weekly');
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+        try {
+            const res = await api.get('/user/profile/');
+            setProfile(res.data);
+        } catch (error) {
+            console.error("Error fetching profile", error);
+        }
+    };
+    fetchProfile();
+  }, []);
 
 
   // Chart Data
   const engagementData = {
     labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
     datasets: [{
-      label: 'Focus Time',
-      data: [45, 60, 75, 50, 85, 40, 95],
+      label: 'Focus Time (mins)',
+      data: profile?.focus_history?.length > 0 ? profile.focus_history : [0, 0, 0, 0, 0, 0, 0],
       borderColor: CHART_COLORS.violet,
       backgroundColor: 'rgba(139, 92, 246, 0.2)',
       tension: 0.4,
@@ -76,7 +90,7 @@ const Dashboard = () => {
   const progressData = {
     labels: ['Frontend', 'Backend', 'AI/ML', 'DevOps'],
     datasets: [{
-      data: [35, 25, 20, 20],
+      data: [35, 25, 20, 20], // This could also be dynamic if backend supports it, for now keeping static as requested only for focus/dashboard generally
       backgroundColor: Object.values(CHART_COLORS),
       borderWidth: 0
     }]
@@ -136,30 +150,30 @@ const Dashboard = () => {
                       className="text-2xl font-bold mb-4"
                       style={{ color: THEME.text.primary }}
                     >
-                      75/120 mins
+                      {profile?.daily_focus || 0}/120 mins
                     </p>
                   </div>
                   <div className="relative w-16 h-16">
                     <Doughnut 
                       data={{
                         datasets: [{
-                          data: [75, 45],
+                          data: [profile?.daily_focus || 0, 120 - (profile?.daily_focus || 0)],
                           backgroundColor: [CHART_COLORS.violet, THEME.bg.secondary]
                         }]
                       }}
-                      options={{ cutout: '70%' }}
+                      options={{ cutout: '70%', plugins: { tooltip: { enabled: false } } }}
                     />
                     <span 
                       className="-translate-y-9 text-xs font-medium flex items-center justify-center"
                       style={{ color: THEME.text.primary }}
                     >
-                      62%
+                      {Math.round(((profile?.daily_focus || 0) / 120) * 100)}%
                     </span>
                   </div>
                 </div>
                 <div className="flex items-center text-sm" style={{ color: THEME.text.secondary }}>
                   <FiActivity className="mr-2" />
-                  <span>22% better than last week</span>
+                  <span>Keep it up!</span>
                 </div>
               </div>
 
@@ -178,7 +192,7 @@ const Dashboard = () => {
                       className="text-2xl font-bold mt-1"
                       style={{ color: THEME.text.primary }}
                     >
-                      8/10 hrs
+                      {profile?.weekly_goal || 10} hrs
                     </p>
                   </div>
                   <FiStar className="text-2xl" style={{ color: CHART_COLORS.amber }} />
@@ -187,7 +201,7 @@ const Dashboard = () => {
                   <div 
                     className="h-2 rounded-full transition-all duration-500"
                     style={{ 
-                      width: '80%',
+                      width: '60%', 
                       backgroundColor: CHART_COLORS.amber
                     }}
                   />
@@ -209,16 +223,16 @@ const Dashboard = () => {
                       className="text-2xl font-bold mt-1"
                       style={{ color: THEME.text.primary }}
                     >
-                      1,450 XP
+                      {profile?.xp || 0} XP
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm" style={{ color: THEME.text.secondary }}>Level 4</span>
+                    <span className="text-sm" style={{ color: THEME.text.secondary }}>Level {profile?.level || 1}</span>
                     <div 
                       className="w-8 h-8 rounded-full flex items-center justify-center"
                       style={{ backgroundColor: CHART_COLORS.emerald }}
                     >
-                      <span style={{ color: THEME.text.primary }}>L4</span>
+                      <span style={{ color: THEME.text.primary }}>L{profile?.level || 1}</span>
                     </div>
                   </div>
                 </div>
