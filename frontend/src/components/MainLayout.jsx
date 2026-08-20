@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Outlet, NavLink, useLocation } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 import { 
   FiHome, FiBook, FiMessageSquare,
   FiStar, FiChevronLeft, FiChevronRight,
@@ -16,6 +17,7 @@ const MENU = [
 const MainLayout = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
+  const { user } = useContext(AuthContext);
 
   return (
     <div className="flex min-h-screen font-mon" style={{ backgroundColor: '#0f172a' }}>
@@ -25,7 +27,7 @@ const MainLayout = () => {
           <div className="flex items-center justify-between mb-8 p-2">
             {isOpen ? (
               <span className="text-xl font-bold" style={{ color: '#818cf8' }}>
-                ToolBox
+                ProLearn
               </span>
             ) : (
               <div className="w-6 h-6 rounded-full" style={{ backgroundColor: '#818cf8' }} />
@@ -78,7 +80,7 @@ const MainLayout = () => {
           </div>
           <div className="flex items-center gap-4">
             <div className="text-right">
-              <p style={{ color: '#f8fafc' }}>Mridul Narula</p>
+              <p style={{ color: '#f8fafc' }}>{user?.username || 'Learner'}</p>
               <p className="text-sm" style={{ color: '#e2e8f0' }}>Learning Level: Advanced</p>
             </div>
             <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: '#4f46e5', color: '#f8fafc' }}>
