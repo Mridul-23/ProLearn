@@ -57,6 +57,65 @@ class UserProfileView(APIView):
     def get(self, request):
         try:
             profile = request.user.profile
+
+            serializer = UserProfileSerializer(
+                profile,
+                context={"request": request}
+            )
+            return Response(serializer.data)
+
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"error": "Profile not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+    def patch(self, request):
+        try:
+            profile = request.user.profile
+
+            serializer = UserProfileSerializer(
+                profile,
+                data=request.data,
+                partial=True,
+                context={"request": request}
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+
+        except UserProfile.DoesNotExist:
+            return Response(
+                {"error": "Profile not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+class FocusTimeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            profile = request.user.profile
+            seconds = int(request.data.get('seconds', 0))
+            if seconds > 0:
+                from datetime import date, timedelta
+                today = date.today().isoformat()
+                
+                # Ensure focus_history is a dictionary
+                if not isinstance(profile.focus_history, dict):
+                    profile.focus_history = {}
+                
+                # Add seconds to today
+                profile.focus_history[today] = profile.focus_history.get(today, 0) + seconds
+                
+                # Keep only last 7 days
+                seven_days_ago = (date.today() - timedelta(days=6)).isoformat()
+                keys_to_delete = [k for k in profile.focus_history.keys() if k < seven_days_ago]
+                for k in keys_to_delete:
+                    del profile.focus_history[k]
+                    
+                profile.save()
+                
             serializer = UserProfileSerializer(profile)
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
