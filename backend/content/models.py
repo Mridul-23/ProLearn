@@ -5,15 +5,15 @@ class Resource(models.Model):
     RESOURCE_TYPES = [
         ('video', 'Video'),
         ('article', 'Article'),
-        ('ebook', 'E-Book'),
+        ('ai_note', 'AI Note'),
     ]
-    
+
     title = models.CharField(max_length=255)
-    url = models.URLField()
+    url = models.URLField(blank=True, null=True)
     resource_type = models.CharField(max_length=20, choices=RESOURCE_TYPES)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources', null=True, blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources', null=True, blank=True,)
 
     def __str__(self):
         return self.title
@@ -23,6 +23,7 @@ class StudyPlan(models.Model):
     description = models.TextField()
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='study_plans')
     created_at = models.DateTimeField(auto_now_add=True)
+    is_completed = models.BooleanField(default=False)
     
     def __str__(self):
         return self.title
