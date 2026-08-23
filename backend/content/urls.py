@@ -1,13 +1,13 @@
-from django.urls import path, include
-from rest_framework.routers import DefaultRouter
-from .views import ResourceViewSet, ExternalResourceViewSet, StudyPlanViewSet, AITutorView
+from django.urls import path
 
-router = DefaultRouter()
-router.register(r'resources', ResourceViewSet, basename='resource')
-router.register(r'browse', ExternalResourceViewSet, basename='browse')
-router.register(r'study-plans', StudyPlanViewSet, basename='study-plan')
-router.register(r'ai-tutor', AITutorView, basename='ai-tutor')
+from . import views
 
 urlpatterns = [
-    path('', include(router.urls)),
+    path("resources/", views.ResourceListCreateView.as_view(), name="resources",),
+    path("resources/<int:pk>/", views.ResourceDetailView.as_view(), name="resource-detail",),
+    path("study-plans/", views.StudyPlanListCreateView.as_view(), name="study-plans",),
+    path("study-plans/<int:pk>/", views.StudyPlanDetailView.as_view(), name="study-plan-detail",),
+    path("study-plans/<int:plan_id>/steps/<int:step_id>/", views.StudyStepToggleView.as_view(), name="study-step-toggle"),
+    path("browse/youtube/", views.YouTubeSearchView.as_view(), name="youtube-search",),
+    path("browse/medium/", views.MediumSearchView.as_view(), name="medium-search",),
 ]
