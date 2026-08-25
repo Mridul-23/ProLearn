@@ -1,346 +1,351 @@
-import { useState, useEffect } from 'react';
-import api from '../utils/api';
-import { Line, Bar, Doughnut } from 'react-chartjs-2';
-import {
-  FiHome, FiBook, FiCalendar, FiMessageSquare,
-  FiUsers, FiStar, FiChevronLeft, FiChevronRight,
-  FiActivity, FiAward, FiClock, FiUser
-} from 'react-icons/fi';
+import { useEffect, useMemo, useState } from "react";
+import { Line, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
-  Title,
   Tooltip,
   Legend,
-  Filler
-} from 'chart.js';
+  Filler,
+} from "chart.js";
+import {
+  FiActivity,
+  FiAward,
+  FiClock,
+  FiPlus,
+  FiStar,
+  FiTrash2,
+} from "react-icons/fi";
+import api from "../utils/api";
 
-// Chart.js Setup
 ChartJS.register(
   CategoryScale,
   LinearScale,
   PointElement,
   LineElement,
-  BarElement,
   ArcElement,
-  Title,
   Tooltip,
   Legend,
-  Filler
+  Filler,
 );
 
-// Theme Constants
-const THEME = {
-  text: {
-    primary: '#f8fafc',    // slate-50
-    secondary: '#e2e8f0',  // slate-200
-    accent: '#818cf8'      // indigo-400
-  },
-  bg: {
-    primary: '#0f172a',    // slate-900
-    secondary: '#1e293b',  // slate-800
-    accent: '#4f46e5'      // indigo-600
-  }
-};
+const COLORS = [
+  "#6366f1",
+  "#10b981",
+  "#f59e0b",
+  "#f43f5e",
+  "#8b5cf6",
+  "#06b6d4",
+  "#84cc16",
+  "#f97316",
+  "#ec4899",
+  "#14b8a6",
+];
+const panel =
+  "rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl p-6 shadow-sm shadow-slate-950/50";
 
-const CHART_COLORS = {
-  indigo: '#6366f1',
-  emerald: '#10b981',
-  amber: '#f59e0b',
-  rose: '#f43f5e',
-  violet: '#8b5cf6'
-};
+const weekDays = () =>
+  Array.from({ length: 7 }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - 6 + index);
+    return {
+      key: date.toISOString().slice(0, 10),
+      label: date.toLocaleDateString("en-US", { weekday: "short" }),
+    };
+  });
 
-const Dashboard = () => {
-  const [timeRange, setTimeRange] = useState('weekly');
+export default function Dashboard() {
   const [profile, setProfile] = useState(null);
+  const [plans, setPlans] = useState([]);
+  const [goal, setGoal] = useState("10");
+  const [savingGoal, setSavingGoal] = useState(false);
+  const [topicInput, setTopicInput] = useState("");
+  const [topics, setTopics] = useState(() =>
+    JSON.parse(localStorage.getItem("prolearn-topics") || "[]"),
+  );
+
+  const [stopwatchRunning, setStopwatchRunning] = useState(false);
+  const [stopwatchSeconds, setStopwatchSeconds] = useState(0);
+
+  const load = async () => {
+    const [profileResponse, planResponse] = await Promise.all([
+      api.get("/user/profile/"),
+      api.get("/api/study-plans/"),
+    ]);
+    setProfile(profileResponse.data);
+    setGoal(String(profileResponse.data.weekly_goal));
+    setPlans(planResponse.data);
+  };
 
   useEffect(() => {
-    const fetchProfile = async () => {
-        try {
-            const res = await api.get('/user/profile/');
-            setProfile(res.data);
-        } catch (error) {
-            console.error("Error fetching profile", error);
-        }
-    };
-    fetchProfile();
+    load().catch((error) => console.error("Unable to load dashboard", error));
   }, []);
+  useEffect(() => {
+    localStorage.setItem("prolearn-topics", JSON.stringify(topics));
+  }, [topics]);
 
+  useEffect(() => {
+    let interval;
+    if (stopwatchRunning) {
+      interval = setInterval(() => setStopwatchSeconds((s) => s + 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [stopwatchRunning]);
 
-  // Chart Data
-  const engagementData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [{
-      label: 'Focus Time (mins)',
-      data: profile?.focus_history?.length > 0 ? profile.focus_history : [0, 0, 0, 0, 0, 0, 0],
-      borderColor: CHART_COLORS.violet,
-      backgroundColor: 'rgba(139, 92, 246, 0.2)',
-      tension: 0.4,
-      fill: true,
-      borderWidth: 2
-    }]
+  const handleStopwatch = async () => {
+    if (stopwatchRunning) {
+      setStopwatchRunning(false);
+      if (stopwatchSeconds > 0) {
+        try {
+          const { data } = await api.post("/user/focus/", {
+            seconds: stopwatchSeconds,
+          });
+          setProfile(data);
+        } catch (error) {
+          console.error("Failed to post focus time", error);
+        }
+      }
+      setStopwatchSeconds(0);
+    } else {
+      setStopwatchRunning(true);
+    }
   };
 
-  const progressData = {
-    labels: ['Frontend', 'Backend', 'AI/ML', 'DevOps'],
-    datasets: [{
-      data: [35, 25, 20, 20], // This could also be dynamic if backend supports it, for now keeping static as requested only for focus/dashboard generally
-      backgroundColor: Object.values(CHART_COLORS),
-      borderWidth: 0
-    }]
+  const formatStopwatch = (totalSeconds) => {
+    const m = Math.floor(totalSeconds / 60);
+    const s = totalSeconds % 60;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
+  const days = useMemo(weekDays, []);
+  const focusByDay = Object.fromEntries(
+    (profile?.focus_history || []).map((item) => [item.date, item.minutes]),
+  );
+  const focusValues = days.map((day) => focusByDay[day.key] || 0);
+  const weeklyMinutes = focusValues.reduce(
+    (total, minutes) => total + minutes,
+    0,
+  );
 
-  // Chart Options
+  const weeklyHours = (weeklyMinutes / 60).toFixed(1);
+
+  const weeklyGoalMinutes = Math.max(Number(profile?.weekly_goal || 0) * 60, 1);
+
+  const goalProgress = Math.min(
+    100,
+    Math.round((weeklyMinutes / weeklyGoalMinutes) * 100),
+  );
+  const completedPlans = plans
+    .filter((plan) => plan.is_completed)
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
   const chartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: {
-        labels: { color: THEME.text.primary }
-      },
-      tooltip: {
-        backgroundColor: THEME.bg.secondary,
-        titleColor: THEME.text.primary,
-        bodyColor: THEME.text.secondary
-      }
+      legend: { labels: { color: "#94a3b8", font: { family: "Poppins" } } },
     },
     scales: {
       x: {
-        grid: { color: '#334155' },
-        ticks: { color: THEME.text.secondary }
+        ticks: { color: "#94a3b8", font: { family: "Poppins" } },
+        grid: { color: "rgba(51, 65, 85, 0.4)" },
       },
       y: {
-        grid: { color: '#334155' },
-        ticks: { color: THEME.text.secondary }
-      }
+        beginAtZero: true,
+        ticks: { color: "#94a3b8", font: { family: "Poppins" } },
+        grid: { color: "rgba(51, 65, 85, 0.4)" },
+      },
+    },
+  };
+
+  const engagementData = {
+    labels: days.map((day) => day.label),
+    datasets: [
+      {
+        label: "Focus time (minutes)",
+        data: focusValues,
+        borderColor: "#818cf8",
+        backgroundColor: "rgba(129, 140, 248, 0.1)",
+        tension: 0.35,
+        fill: true,
+      },
+    ],
+  };
+
+  const topicData = {
+    labels: topics,
+    datasets: [
+      {
+        data: topics.map(() => 1),
+        backgroundColor: topics.map(
+          (_, index) => COLORS[index % COLORS.length],
+        ),
+        borderWidth: 0,
+      },
+    ],
+  };
+
+  const saveGoal = async () => {
+    const weeklyGoal = Number(goal);
+    if (!Number.isFinite(weeklyGoal) || weeklyGoal <= 0) return;
+    setSavingGoal(true);
+    try {
+      const { data } = await api.patch("/user/profile/", {
+        weekly_goal: weeklyGoal,
+      });
+      setProfile(data);
+    } finally {
+      setSavingGoal(false);
     }
   };
 
+  const addTopic = (event) => {
+    event.preventDefault();
+    const topic = topicInput.trim();
+    if (!topic || topics.length >= 10 || topics.includes(topic)) return;
+    setTopics([...topics, topic]);
+    setTopicInput("");
+  };
+
+  const updateTopic = (index, value) =>
+    setTopics(
+      topics
+        .map((topic, topicIndex) => (topicIndex === index ? value : topic))
+        .filter(Boolean),
+    );
+
   return (
-    <div className="flex min-h-screen font-mon" style={{ backgroundColor: THEME.bg.primary }}>
-
-      {/* Main Content */}
-      <div className="flex-1 p-8 overflow-x-hidden">
-
-        {/* Dashboard Content */}
-          <div className="space-y-8">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {/* Focus Time Card */}
-              <div 
-                className="p-6 rounded-xl border"
-                style={{ 
-                  backgroundColor: THEME.bg.secondary,
-                  borderColor: '#334155'
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm mb-2" style={{ color: THEME.text.secondary }}>
-                      Daily Focus
-                    </p>
-                    <p 
-                      className="text-2xl font-bold mb-4"
-                      style={{ color: THEME.text.primary }}
-                    >
-                      {profile?.daily_focus || 0}/120 mins
-                    </p>
-                  </div>
-                  <div className="relative w-16 h-16">
-                    <Doughnut 
-                      data={{
-                        datasets: [{
-                          data: [profile?.daily_focus || 0, 120 - (profile?.daily_focus || 0)],
-                          backgroundColor: [CHART_COLORS.violet, THEME.bg.secondary]
-                        }]
-                      }}
-                      options={{ cutout: '70%', plugins: { tooltip: { enabled: false } } }}
-                    />
-                    <span 
-                      className="-translate-y-9 text-xs font-medium flex items-center justify-center"
-                      style={{ color: THEME.text.primary }}
-                    >
-                      {Math.round(((profile?.daily_focus || 0) / 120) * 100)}%
-                    </span>
-                  </div>
-                </div>
-                <div className="flex items-center text-sm" style={{ color: THEME.text.secondary }}>
-                  <FiActivity className="mr-2" />
-                  <span>Keep it up!</span>
-                </div>
-              </div>
-
-              {/* Progress Card */}
-              <div 
-                className="p-6 rounded-xl border"
-                style={{ 
-                  backgroundColor: THEME.bg.secondary,
-                  borderColor: '#334155'
-                }}
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <p className="text-sm" style={{ color: THEME.text.secondary }}>Weekly Goal</p>
-                    <p 
-                      className="text-2xl font-bold mt-1"
-                      style={{ color: THEME.text.primary }}
-                    >
-                      {profile?.weekly_goal || 10} hrs
-                    </p>
-                  </div>
-                  <FiStar className="text-2xl" style={{ color: CHART_COLORS.amber }} />
-                </div>
-                <div className="w-full bg-slate-700/20 rounded-full h-2">
-                  <div 
-                    className="h-2 rounded-full transition-all duration-500"
-                    style={{ 
-                      width: '60%', 
-                      backgroundColor: CHART_COLORS.amber
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Points Card */}
-              <div 
-                className="p-6 rounded-xl border"
-                style={{ 
-                  backgroundColor: THEME.bg.secondary,
-                  borderColor: '#334155'
-                }}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm" style={{ color: THEME.text.secondary }}>Knowledge Points</p>
-                    <p 
-                      className="text-2xl font-bold mt-1"
-                      style={{ color: THEME.text.primary }}
-                    >
-                      {profile?.xp || 0} XP
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm" style={{ color: THEME.text.secondary }}>Level {profile?.level || 1}</span>
-                    <div 
-                      className="w-8 h-8 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: CHART_COLORS.emerald }}
-                    >
-                      <span style={{ color: THEME.text.primary }}>L{profile?.level || 1}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Top Metric Cards */}
+      <section className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className={panel}>
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-400">
+                Today&apos;s Focus
+              </p>
+              <p className="mt-1 text-3xl font-bold tracking-tight text-white">
+                {profile?.daily_focus || 0} min
+              </p>
             </div>
-
-            {/* Engagement Chart */}
-            <div 
-              className="p-6 rounded-xl border"
-              style={{ 
-                backgroundColor: THEME.bg.secondary,
-                borderColor: '#334155'
-              }}
-            >
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 
-                    className="text-lg font-semibold mb-2"
-                    style={{ color: THEME.text.primary }}
-                  >
-                    Learning Engagement
-                  </h2>
-                  <p className="text-sm" style={{ color: THEME.text.secondary }}>
-                    Focus time distribution across days
-                  </p>
-                </div>
-                <select
-                  value={timeRange}
-                  onChange={(e) => setTimeRange(e.target.value)}
-                  className="px-4 py-2 rounded-lg text-sm"
-                  style={{
-                    backgroundColor: THEME.bg.primary,
-                    color: THEME.text.primary,
-                    borderColor: '#334155'
-                  }}
-                >
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
+            <div className="flex flex-col items-end">
+              <div className="text-2xl font-mono text-indigo-400 mb-2">
+                {formatStopwatch(stopwatchSeconds)}
               </div>
-              <div className="h-96">
-                <Line data={engagementData} options={chartOptions} />
-              </div>
-            </div>
-
-            {/* Progress Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Knowledge Distribution */}
-              <div 
-                className="p-6 rounded-xl border"
-                style={{ 
-                  backgroundColor: THEME.bg.secondary,
-                  borderColor: '#334155'
-                }}
+              <button
+                onClick={handleStopwatch}
+                className={`px-4 py-2 rounded-xl text-xs font-semibold tracking-wide transition-all duration-200 cursor-pointer ${stopwatchRunning ? "bg-rose-500/20 text-rose-400 border border-rose-500/30 hover:bg-rose-500/30" : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/30"}`}
               >
-                <h2 
-                  className="text-lg font-semibold mb-6"
-                  style={{ color: THEME.text.primary }}
-                >
-                  Knowledge Distribution
-                </h2>
-                <div className="h-64">
-                  <Doughnut data={progressData} options={chartOptions} />
-                </div>
-              </div>
-
-              {/* Recent Activities */}
-              <div 
-                className="p-6 rounded-xl border"
-                style={{ 
-                  backgroundColor: THEME.bg.secondary,
-                  borderColor: '#334155'
-                }}
-              >
-                <h2 
-                  className="text-lg font-semibold mb-6"
-                  style={{ color: THEME.text.primary }}
-                >
-                  Recent Achievements
-                </h2>
-                <div className="space-y-4">
-                  {[1, 2, 3].map((item) => (
-                    <div 
-                      key={item}
-                      className="p-4 rounded-lg flex items-center gap-4 transition-colors hover:bg-slate-700/20"
-                    >
-                      <div 
-                        className="w-12 h-12 rounded-lg flex items-center justify-center"
-                        style={{ backgroundColor: CHART_COLORS.indigo }}
-                      >
-                        <FiAward className="text-xl" style={{ color: THEME.text.primary }} />
-                      </div>
-                      <div>
-                        <p style={{ color: THEME.text.primary }}>Completed React Course</p>
-                        <p className="text-sm" style={{ color: THEME.text.secondary }}>
-                          Earned 150 XP
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                {stopwatchRunning ? "Stop Focus" : "Start Focus"}
+              </button>
             </div>
           </div>
+          <p className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+            <FiActivity className="text-indigo-400" /> Focus time accumulates
+            dynamically for today.
+          </p>
+        </div>
+
+        <div className={panel}>
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-sm font-medium text-slate-400">Weekly Goal</p>
+              <p className="mt-1 text-3xl font-bold tracking-tight text-white">
+                {weeklyHours} / {profile?.weekly_goal || 0} hrs
+              </p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <FiStar className="text-xl text-amber-400" />
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2">
+            <input
+              aria-label="Weekly goal in hours"
+              className="w-28 rounded-xl bg-slate-950/60 border border-slate-800 px-3.5 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 transition-colors"
+              type="number"
+              min="1"
+              value={goal}
+              onChange={(event) => setGoal(event.target.value)}
+            />
+            <button
+              onClick={saveGoal}
+              disabled={savingGoal}
+              className="rounded-xl bg-indigo-600 hover:bg-indigo-500 px-4 py-2 text-sm font-medium text-white transition-colors disabled:opacity-60 cursor-pointer shadow-sm shadow-indigo-600/30"
+            >
+              {savingGoal ? "Saving..." : "Save hours"}
+            </button>
+          </div>
+          <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-950/60 border border-slate-800/80">
+            <div
+              className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-500"
+              style={{ width: `${goalProgress}%` }}
+            />
+          </div>
+          <p className="mt-2 text-xs text-slate-400">
+            {goalProgress}% of this week&apos;s goal achieved
+          </p>
+        </div>
+      </section>
+
+      {/* Analytics Chart Section */}
+      <section className={panel}>
+        <h2 className="text-lg font-bold text-white tracking-tight">
+          Learning Engagement
+        </h2>
+        <p className="mb-5 text-xs sm:text-sm text-slate-400">
+          Focus time distribution over the last seven days
+        </p>
+        <div className="h-80 w-full">
+          <Line data={engagementData} options={chartOptions} />
+        </div>
+      </section>
+
+      {/* Recent Achievements */}
+      <div className={panel}>
+        <h2 className="text-lg font-bold text-white tracking-tight">
+          Recent Achievements
+        </h2>
+        <p className="mb-5 text-xs sm:text-sm text-slate-400">
+          Study plans you have successfully completed
+        </p>
+
+        <div className="grid grid-cols-2 gap-3 max-h-[380px] overflow-y-auto pr-1">
+          {completedPlans.length ? (
+            completedPlans.map((plan) => (
+              <div
+                key={plan.id}
+                className="flex items-center gap-3.5 rounded-xl bg-slate-950/40 border border-slate-800/60 p-3.5"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                  <FiAward className="text-lg text-emerald-400" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm text-slate-200">
+                    {plan.title}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Completed &bull;{" "}
+                    {new Date(plan.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="py-16 text-center">
+              <FiAward className="text-4xl text-slate-600 mx-auto mb-3" />
+              <p className="text-sm text-slate-400 font-medium">
+                No completed roadmaps yet
+              </p>
+              <p className="text-xs text-slate-500 mt-1">
+                Complete a study plan to unlock achievements here.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}
