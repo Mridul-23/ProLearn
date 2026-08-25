@@ -6,6 +6,7 @@ class Resource(models.Model):
         ('video', 'Video'),
         ('article', 'Article'),
         ('ai_note', 'AI Note'),
+        ('user_note', 'User Note')
     ]
 
     title = models.CharField(max_length=255)
@@ -13,7 +14,7 @@ class Resource(models.Model):
     resource_type = models.CharField(max_length=20, choices=RESOURCE_TYPES)
     description = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources', null=True, blank=True,)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='resources')
 
     def __str__(self):
         return self.title
