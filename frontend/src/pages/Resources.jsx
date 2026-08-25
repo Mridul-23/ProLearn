@@ -103,7 +103,7 @@ const Resources = () => {
         await api.post("/api/resources/", {
           title: noteTitle,
           description: noteDesc,
-          resource_type: "ai_note",
+          resource_type: "user_note",
           url: "",
         });
         showNotification("new", "Created!");
@@ -141,6 +141,7 @@ const Resources = () => {
       video: "bg-red-500/8 text-red-300/80 border-red-400/15",
       article: "bg-sky-500/8 text-sky-300/80 border-sky-400/15",
       ai_note: "bg-violet-500/8 text-violet-300/80 border-violet-400/15",
+      user_note: "bg-emerald-500/8 text-emerald-300/80 border-emerald-400/15",
     };
     return classes[type] || "bg-slate-500/8 text-slate-400 border-slate-700";
   };
@@ -150,7 +151,7 @@ const Resources = () => {
       {/* Header */}
       <div className="mb-7">
         <h1 className="text-xl font-semibold text-slate-100">Resources</h1>
-        <p className="mt-1 text-sm text-slate-400">Save useful videos, articles, and AI notes for later.</p>
+        <p className="mt-1 text-sm text-slate-400">Save useful videos, articles, and notes for later.</p>
       </div>
 
       {/* Tabs */}
@@ -193,56 +194,59 @@ const Resources = () => {
           </div>
 
           <div className="space-y-2">
-            {filteredResources.map((resource) => (
-              <div
-                key={resource.id}
-                className="group flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 hover:bg-slate-950 transition-colors"
-              >
-                <div className="min-w-0">
-                  {resource.resource_type === "ai_note" ? (
-                    <button
-                      onClick={() => setSelectedNote(resource)}
-                      className="max-w-full font-medium text-slate-200 hover:text-indigo-300 flex items-center gap-2 transition-colors text-left"
-                    >
-                      <span className="truncate">{resource.title}</span>
-                      <FiBookOpen size={14} className="flex-shrink-0 text-slate-500" />
-                    </button>
-                  ) : (
-                    <a
-                      href={resource.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="max-w-full font-medium text-slate-200 hover:text-indigo-300 flex items-center gap-2 transition-colors"
-                    >
-                      <span className="truncate">{resource.title}</span>
-                      <FiExternalLink size={14} className="flex-shrink-0 text-slate-500" />
-                    </a>
-                  )}
-                  <span className={`inline-flex mt-2 px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wider ${getTypeClass(resource.resource_type)}`}>
-                    {resource.resource_type.replace("_", " ")}
-                  </span>
-                </div>
+            {filteredResources.map((resource) => {
+              const isNote = resource.resource_type === "ai_note" || resource.resource_type === "user_note";
+              return (
+                <div
+                  key={resource.id}
+                  className="group flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 hover:bg-slate-950 transition-colors"
+                >
+                  <div className="min-w-0">
+                    {isNote ? (
+                      <button
+                        onClick={() => setSelectedNote(resource)}
+                        className="max-w-full font-medium text-slate-200 hover:text-indigo-300 flex items-center gap-2 transition-colors text-left"
+                      >
+                        <span className="truncate">{resource.title}</span>
+                        <FiBookOpen size={14} className="flex-shrink-0 text-slate-500" />
+                      </button>
+                    ) : (
+                      <a
+                        href={resource.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="max-w-full font-medium text-slate-200 hover:text-indigo-300 flex items-center gap-2 transition-colors"
+                      >
+                        <span className="truncate">{resource.title}</span>
+                        <FiExternalLink size={14} className="flex-shrink-0 text-slate-500" />
+                      </a>
+                    )}
+                    <span className={`inline-flex mt-2 px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wider ${getTypeClass(resource.resource_type)}`}>
+                      {resource.resource_type.replace("_", " ")}
+                    </span>
+                  </div>
 
-                <div className="flex items-center gap-1 flex-shrink-0">
-                  {resource.resource_type === "ai_note" && (
+                  <div className="flex items-center gap-1 flex-shrink-0">
+                    {isNote && (
+                      <button
+                        onClick={(e) => handleOpenEditModal(resource, e)}
+                        className="p-2 rounded-lg text-slate-500 hover:text-indigo-300 hover:bg-indigo-500/10 transition-colors"
+                        title="Edit note"
+                      >
+                        <FiEdit2 size={15} />
+                      </button>
+                    )}
                     <button
-                      onClick={(e) => handleOpenEditModal(resource, e)}
-                      className="p-2 rounded-lg text-slate-500 hover:text-indigo-300 hover:bg-indigo-500/10 transition-colors"
-                      title="Edit note"
+                      onClick={() => handleDeleteResource(resource.id)}
+                      className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                      title="Remove resource"
                     >
-                      <FiEdit2 size={15} />
+                      <FiTrash2 size={15} />
                     </button>
-                  )}
-                  <button
-                    onClick={() => handleDeleteResource(resource.id)}
-                    className="p-2 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
-                    title="Remove resource"
-                  >
-                    <FiTrash2 size={15} />
-                  </button>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
             {filteredResources.length === 0 && (
               <div className="py-14 text-center rounded-xl border border-dashed border-slate-800 bg-slate-950/30">
@@ -388,13 +392,15 @@ const Resources = () => {
         </div>
       )}
 
-      {/* AI NOTE VIEW MODAL */}
+      {/* NOTE VIEW MODAL */}
       {selectedNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" onClick={() => setSelectedNote(null)}>
           <div className="w-full max-w-3xl max-h-[75vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-800">
               <div className="min-w-0">
-                <p className="text-[10px] uppercase tracking-wider text-violet-400/80 font-semibold mb-1">AI Note</p>
+                <p className="text-[10px] uppercase tracking-wider text-violet-400/80 font-semibold mb-1">
+                  {selectedNote.resource_type === "user_note" ? "User Note" : "AI Note"}
+                </p>
                 <h2 className="text-base font-semibold text-slate-100 truncate">{selectedNote.title}</h2>
               </div>
               <button onClick={() => setSelectedNote(null)} className="flex-shrink-0 p-2 rounded-lg text-slate-500 hover:text-slate-200 hover:bg-slate-800 transition-colors">
