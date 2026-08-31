@@ -1,20 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { FiCpu, FiSend, FiBookmark } from "react-icons/fi";
+import { FiCpu, FiSend, FiBookmark, FiRefreshCw } from "react-icons/fi";
 import ReactMarkdown from "react-markdown";
 import { motion } from "framer-motion";
 
 import { useGemini } from "../services/useGemini";
+import { useChat } from "../context/ChatContext";
 import api from "../utils/api";
-
-const INITIAL_MESSAGE = {
-  role: "assistant",
-  content: "Hello! I am your AI Tutor. How can I help you learn today?",
-};
 
 const AITutor = () => {
   const { askGemini } = useGemini();
 
-  const [messages, setMessages] = useState([INITIAL_MESSAGE]);
+  const { messages, updateMessages, refreshChat } = useChat();
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [savedMessages, setSavedMessages] = useState(new Map());
@@ -77,28 +73,22 @@ const AITutor = () => {
     const userMessage = { role: "user", content: text };
     const conversation = [...messages, userMessage].slice(-12);
 
-    setMessages((prev) => [...prev, userMessage]);
+    updateMessages(userMessage);
     setInput("");
     setLoading(true);
 
     try {
       const reply = await askGemini(conversation);
-      setMessages((prev) => [
-        ...prev,
-        {
+      updateMessages({
           role: "assistant",
           content: reply || "I could not generate a response.",
-        },
-      ]);
+        });
     } catch (error) {
       console.error("Gemini error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
+      updateMessages({
           role: "assistant",
           content: "Please add your Gemini API key to use the AI Tutor.",
-        },
-      ]);
+        });
     } finally {
       setLoading(false);
       setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 50);
@@ -114,11 +104,16 @@ const AITutor = () => {
     }
   };
 
+  const handleRefresh = () => {
+    refreshChat();
+  };
+
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] bg-slate-900/60 backdrop-blur-xl text-slate-100 font-poppins rounded-2xl overflow-hidden border border-slate-800/80 m-4 shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-6rem)] bg-slate-900/60 backdrop-blur-xl text-slate-100 font-poppins overflow-hidden border border-slate-800/80 shadow-2xl">
       
       {/* Header */}
-      <div className="bg-slate-950/60 p-4 border-b border-slate-800/80 flex items-center gap-3 backdrop-blur-md">
+      <div className="bg-slate-950/60 p-4 border-b border-slate-800/80 flex items-center justify-between backdrop-blur-md">
+        <div className="flex gap-3 items-center">
         <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/30">
           <FiCpu className="text-xl text-white" />
         </div>
@@ -128,6 +123,10 @@ const AITutor = () => {
             Ask questions and learn interactively
           </p>
         </div>
+        </div>
+        <button className="flex gap-1 cursor-pointer items-center bg-indigo-600 p-2 rounded-xl" onClick={handleRefresh}>
+          <FiRefreshCw /> Refresh Chat
+        </button>
       </div>
 
       {/* Chat Container */}
