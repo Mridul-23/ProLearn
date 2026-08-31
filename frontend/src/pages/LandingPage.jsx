@@ -72,7 +72,7 @@ function Hero() {
           {/* CTA */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 font-poppins">
             <Link
-              to="/signup"
+              to="/user"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-8 py-3.5 rounded-xl font-medium shadow-lg shadow-indigo-600/25 transition-all duration-200 group"
             >
               Get Started Free

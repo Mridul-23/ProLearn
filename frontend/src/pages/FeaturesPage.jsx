@@ -170,7 +170,7 @@ export default function FeaturesPage() {
           </p>
 
           <Link
-            to="/signup"
+            to="/user"
             className="inline-flex items-center gap-2 bg-indigo-600 text-white px-8 py-4 rounded-xl font-medium text-base hover:bg-indigo-500 shadow-lg shadow-indigo-600/25 transition-all duration-200 group"
           >
             Get Started
