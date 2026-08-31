@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .models import UserProfile
-from .serializers import UserProfileSerializer
+from .models import UserProfile, Audit
+from .serializers import UserProfileSerializer, AuditSerializer
 
 class SignupView(APIView):
   permission_classes = [AllowAny]
@@ -120,3 +120,25 @@ class FocusTimeView(APIView):
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class AuditView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        audits = Audit.objects.filter(user=request.user)
+        serializer = AuditSerializer(
+            audits,
+            many=True
+        )
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = AuditSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+    

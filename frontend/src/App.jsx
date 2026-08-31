@@ -23,6 +23,7 @@ import ProfilePage from './pages/ProfilePage';
 
 import { AuthContext } from './context/AuthContext';
 import './App.css';
+import Audit from './pages/Audit';
 
 function RequireAuth({ children }) {
   const { user, loading } = useContext(AuthContext);
@@ -67,6 +68,7 @@ export default function App() {
               <Route path="resources" element={<Resources />} />
               <Route path="ai-tutor" element={<AITutor />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path='audit' element={<Audit />} />
             </Route>
 
             <Route path="/login" element={<LoginPage />} />

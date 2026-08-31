@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserProfile
+from .models import UserProfile, Audit
 from datetime import date
 import math
 
@@ -52,3 +52,18 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ]
 
         return []
+    
+class AuditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Audit
+        fields = [
+            "id",
+            "timestamp",
+            "source",
+            "prompt",
+            "ai_response",
+        ]
+        read_only_fields = [
+            "id",
+            "timestamp",
+        ]

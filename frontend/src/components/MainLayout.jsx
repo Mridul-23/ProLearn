@@ -9,12 +9,14 @@ import {
   FiChevronRight,
   FiUser,
 } from "react-icons/fi";
+import { HiShieldCheck } from "react-icons/hi"
 
 const MENU = [
   { path: "/user", label: "Dashboard", icon: <FiHome /> },
   { path: "/user/study-plan", label: "Study Plan", icon: <FiBook /> },
   { path: "/user/resources", label: "Resources", icon: <FiStar /> },
   { path: "/user/ai-tutor", label: "AI Tutor", icon: <FiMessageSquare /> },
+  { path: "/user/audit", label: "Audit", icon: <HiShieldCheck />},
   { path: "/user/profile", label: "User Profile", icon: <FiUser /> },
 ];
 
