@@ -147,7 +147,7 @@ const Resources = () => {
   };
 
   return (
-    <div className="min-h-[80vh] rounded-2xl border border-slate-800 bg-slate-900 p-6 sm:p-7 font-poppins">
+    <div className="min-h-[80vh] border border-slate-800 bg-slate-900 p-6 sm:p-7 font-poppins">
       {/* Header */}
       <div className="mb-7">
         <h1 className="text-xl font-semibold text-slate-100">Resources</h1>
