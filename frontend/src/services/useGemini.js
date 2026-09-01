@@ -2,6 +2,7 @@ import { useGeminiKey } from "../context/GeminiKeyContext";
 import {
   askGemini as ask,
   generateStudySteps as generateSteps,
+  explainStudyStep as explainStep,
 } from "./gemini";
 
 export const useGemini = () => {
@@ -13,5 +14,19 @@ export const useGemini = () => {
 
     generateStudySteps: (title, description) =>
       generateSteps(title, description, geminiKey),
+
+    explainStudyStep: (
+      title,
+      description,
+      completedSteps,
+      selectedStep
+    ) =>
+      explainStep(
+        title,
+        description,
+        completedSteps,
+        selectedStep,
+        geminiKey
+      ),
   };
 };

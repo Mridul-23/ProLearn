@@ -15,6 +15,7 @@ const SOURCE_LABELS = {
   ai_tutor: "AI Tutor",
   study_plan: "Study Plan",
   unknown: "Unknown",
+  study_step: "Study Step",
 };
 
 const Audit = () => {
