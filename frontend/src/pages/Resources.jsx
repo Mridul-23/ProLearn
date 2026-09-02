@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
   FiArchive,
   FiSearch,
@@ -13,6 +14,10 @@ import ReactMarkdown from "react-markdown";
 import api from "../utils/api";
 
 const Resources = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const browseInputRef = useRef(null);
+  const [focusBrowseSearch, setFocusBrowseSearch] = useState(false);
   const [activeTab, setActiveTab] = useState("storage");
   const [storageQuery, setStorageQuery] = useState("");
   const [browseQuery, setBrowseQuery] = useState("");
@@ -32,6 +37,24 @@ const Resources = () => {
   useEffect(() => {
     fetchStoredResources();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.focusSearch) {
+      setActiveTab("browse");
+      setFocusBrowseSearch(true);
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
+
+  useEffect(() => {
+    if (focusBrowseSearch && activeTab === "browse") {
+      const timer = setTimeout(() => {
+        browseInputRef.current?.focus();
+        setFocusBrowseSearch(false);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+  }, [focusBrowseSearch, activeTab]);
 
   const fetchStoredResources = async () => {
     try {
@@ -160,9 +183,8 @@ const Resources = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${
-              activeTab === tab ? "border-indigo-400 text-indigo-300" : "border-transparent text-slate-500 hover:text-slate-300"
-            }`}
+            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab ? "border-indigo-400 text-indigo-300" : "border-transparent text-slate-500 hover:text-slate-300"
+              }`}
           >
             {tab === "storage" ? <FiArchive size={15} /> : <FiSearch size={15} />}
             {tab === "storage" ? "Stored Resources" : "Browse"}
@@ -267,6 +289,7 @@ const Resources = () => {
               <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500" size={16} />
               <input
                 type="text"
+                ref={browseInputRef}
                 placeholder="Search for a topic..."
                 value={browseQuery}
                 onChange={(e) => setBrowseQuery(e.target.value)}

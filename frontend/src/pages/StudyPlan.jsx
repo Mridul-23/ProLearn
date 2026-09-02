@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { FiBook, FiPlus, FiTrash, FiMap, FiX, FiCheck, FiLoader } from "react-icons/fi";
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState, MarkerType } from "reactflow";
 import api from "../utils/api";
@@ -19,6 +19,7 @@ const StudyPlan = () => {
   const [explainingStep, setExplainingStep] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const titleInputRef = useRef(null);
   const { generateStudySteps, explainStudyStep } = useGemini();
 
   const fetchPlans = async () => {
@@ -30,8 +31,11 @@ const StudyPlan = () => {
     }
   };
 
-  useEffect(() => { fetchPlans(); }, []);
-
+  useEffect(() => { 
+    fetchPlans(); 
+    titleInputRef.current?.focus();
+  }, []);
+  
   useEffect(() => {
     if (!selectedPlan?.steps) {
       setNodes([]);
@@ -201,6 +205,7 @@ const StudyPlan = () => {
         <form onSubmit={createPlan} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
+              ref={titleInputRef}
               type="text"
               placeholder="Plan title"
               value={newPlanTitle}
