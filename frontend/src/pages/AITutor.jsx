@@ -124,8 +124,9 @@ const AITutor = () => {
           </p>
         </div>
         </div>
-        <button className="flex gap-1 cursor-pointer items-center bg-indigo-600 p-2 rounded-xl" onClick={handleRefresh}>
-          <FiRefreshCw /> Refresh Chat
+        <button type="button" onClick={handleRefresh} className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/70 border border-slate-800 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 hover:border-indigo-500/30 active:scale-95 transition-all duration-200">
+          <FiRefreshCw className="text-indigo-400 transition-transform duration-500 group-hover:rotate-180" />
+          <span>Refresh Chat</span>
         </button>
       </div>
 
