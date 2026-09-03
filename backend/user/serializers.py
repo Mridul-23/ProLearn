@@ -1,12 +1,12 @@
 from rest_framework import serializers
+from django.contrib.auth.models import User
 from .models import UserProfile, Audit
 from datetime import date
 import math
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        source="user.username",
-        read_only=True
+        source="user.username"
     )
     avatar = serializers.SerializerMethodField()
     daily_focus = serializers.SerializerMethodField()
@@ -22,6 +22,32 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "weekly_goal",
             "focus_history",
         ]
+
+    def validate_username(self, value):
+        value = value.strip()
+
+        if not value:
+            raise serializers.ValidationError("Username cannot be empty.")
+
+        user = self.instance.user
+
+        if User.objects.filter(username=value).exclude(
+            pk=user.pk
+        ).exists():
+            raise serializers.ValidationError(
+                "Username already exists."
+            )
+
+        return value
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+
+        if "username" in user_data:
+            instance.user.username = user_data["username"]
+            instance.user.save(update_fields=["username"])
+
+        return super().update(instance, validated_data)
 
     def get_avatar(self, obj):
         if not obj.avatar:
@@ -52,7 +78,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ]
 
         return []
-    
 class AuditSerializer(serializers.ModelSerializer):
     class Meta:
         model = Audit

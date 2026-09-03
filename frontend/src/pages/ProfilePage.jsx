@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { FiCamera, FiKey, FiSave, FiTrash2, FiUser } from "react-icons/fi";
+import { FiCamera, FiKey, FiSave, FiTrash2, FiUser, FiEye, FiEyeOff } from "react-icons/fi";
 import api from "../utils/api";
 import { useGeminiKey } from "../context/GeminiKeyContext";
 
@@ -15,6 +15,20 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
+  const [username, setUsername] = useState("");
+
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [passwordMessage, setPasswordMessage] = useState("");
+  const [passwordMessageType, setPasswordMessageType] = useState("");
+  const [changingPassword, setChangingPassword] = useState(false);
+
   const fileInputRef = useRef(null);
 
   useEffect(() => {
@@ -23,6 +37,7 @@ const ProfilePage = () => {
         const { data } = await api.get("/user/profile/");
         setProfile(data);
         setDisplayName(data.display_name || "");
+        setUsername(data.username || "");
         setPreview(data.avatar || "");
       } catch (error) {
         console.error("Failed to load profile:", error);
@@ -42,6 +57,50 @@ const ProfilePage = () => {
       }
     };
   }, [preview]);
+
+const handleChangePassword = async () => {
+  if (changingPassword) return;
+
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    setPasswordMessage("Please fill in all password fields.");
+    setPasswordMessageType("error");
+    return;
+  }
+
+  if (newPassword !== confirmPassword) {
+    setPasswordMessage("New passwords do not match.");
+    setPasswordMessageType("error");
+    return;
+  }
+
+  setChangingPassword(true);
+  setPasswordMessage("");
+  setPasswordMessageType("");
+
+  try {
+    await api.post("/user/change-password/", {
+      current_password: currentPassword,
+      new_password: newPassword,
+    });
+
+    setCurrentPassword("");
+    setNewPassword("");
+    setConfirmPassword("");
+
+    setPasswordMessage("Password changed successfully.");
+    setPasswordMessageType("success");
+  } catch (error) {
+    console.error("Failed to change password:", error);
+
+    setPasswordMessage(
+      error.response?.data?.error || "Unable to change your password."
+    );
+    setPasswordMessageType("error");
+  } finally {
+    setChangingPassword(false);
+  }
+};
+
 
   const handleAvatarChange = (e) => {
     const file = e.target.files?.[0];
@@ -85,7 +144,7 @@ const ProfilePage = () => {
     try {
       const formData = new FormData();
       formData.append("display_name", displayName.trim());
-
+      formData.append("username", username.trim());
       if (avatarFile) {
         formData.append("avatar", avatarFile);
       } else if (!preview && profile?.avatar) {
@@ -98,6 +157,7 @@ const ProfilePage = () => {
       setDisplayName(data.display_name || "");
       setAvatarFile(null);
       setPreview(data.avatar || "");
+      setUsername(data.username || "");
 
       setMessage("Profile updated successfully.");
     } catch (error) {
@@ -129,7 +189,7 @@ const ProfilePage = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
-      
+
       {/* Profile Section */}
       <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
         <div className="mb-6">
@@ -143,7 +203,7 @@ const ProfilePage = () => {
 
         <form onSubmit={handleSaveProfile}>
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
-            
+
             {/* Avatar Upload Container */}
             <div className="flex flex-col items-center gap-3">
               <div className="w-28 h-28 rounded-full overflow-hidden bg-indigo-600/20 border-2 border-slate-700/80 flex items-center justify-center text-indigo-400 shadow-inner">
@@ -194,9 +254,11 @@ const ProfilePage = () => {
                   Username
                 </label>
                 <input
-                  value={profile?.username || ""}
-                  disabled
-                  className="w-full rounded-xl bg-slate-950/40 border border-slate-800/80 px-4 py-3 text-slate-500 cursor-not-allowed shadow-inner"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  maxLength={150}
+                  placeholder="Choose a username"
+                  className="w-full rounded-xl bg-slate-950/60 border border-slate-800/80 px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
                 />
               </div>
 
@@ -224,6 +286,131 @@ const ProfilePage = () => {
             </div>
           </div>
         </form>
+      </section>
+
+      {/* Security Section */}
+      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-white tracking-wide">
+            Security
+          </h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Change your ProLearn account password.
+          </p>
+        </div>
+
+        <div className="space-y-5">
+          {/* Current Password */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Current password
+            </label>
+
+            <div className="relative">
+              <input
+                type={showCurrentPassword ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Enter your current password"
+                autoComplete="current-password"
+                className="w-full rounded-xl bg-slate-950/60 border border-slate-800/80 px-4 py-3 pr-12 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowCurrentPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
+                aria-label={
+                  showCurrentPassword ? "Hide current password" : "Show current password"
+                }
+              >
+                {showCurrentPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+
+          {/* New Password */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              New password
+            </label>
+
+            <div className="relative">
+              <input
+                type={showNewPassword ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter your new password"
+                autoComplete="new-password"
+                className="w-full rounded-xl bg-slate-950/60 border border-slate-800/80 px-4 py-3 pr-12 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowNewPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
+                aria-label={
+                  showNewPassword ? "Hide new password" : "Show new password"
+                }
+              >
+                {showNewPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm Password */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              Confirm new password
+            </label>
+
+            <div className="relative">
+              <input
+                type={showConfirmPassword ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Confirm your new password"
+                autoComplete="new-password"
+                className="w-full rounded-xl bg-slate-950/60 border border-slate-800/80 px-4 py-3 pr-12 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword((prev) => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-200 transition-colors"
+                aria-label={
+                  showConfirmPassword
+                    ? "Hide password confirmation"
+                    : "Show password confirmation"
+                }
+              >
+                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+
+          {passwordMessage && (
+            <div
+              className={`text-sm font-medium ${
+                passwordMessageType === "success"
+                  ? "text-emerald-400"
+                  : "text-rose-400"
+              }`}
+            >
+              {passwordMessage}
+            </div>
+          )}
+
+          <button
+            type="button"
+            onClick={handleChangePassword}
+            disabled={changingPassword}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-600/20"
+          >
+            <FiSave />
+            {changingPassword ? "Changing..." : "Change password"}
+          </button>
+        </div>
       </section>
 
       {/* Gemini Section */}
