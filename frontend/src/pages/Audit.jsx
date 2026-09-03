@@ -62,7 +62,7 @@ const Audit = () => {
 
           <div>
             <h1 className="text-2xl font-bold text-white">
-              AI Activity
+              ProLearn Audit
             </h1>
             <p className="text-sm text-slate-400 mt-1">
               Review your recent AI interactions in ProLearn.
