@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { FiBook, FiPlus, FiTrash, FiMap, FiX, FiCheck, FiLoader } from "react-icons/fi";
+import { FiBook, FiPlus, FiTrash, FiMap, FiX, FiCheck, FiLoader, FiBookmark } from "react-icons/fi";
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState, MarkerType } from "reactflow";
 import api from "../utils/api";
 import { useGemini } from "../services/useGemini";
@@ -16,9 +16,11 @@ const StudyPlan = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedStep, setSelectedStep] = useState(null);
   const [stepExplanation, setStepExplanation] = useState("");
+  const [explanationError, setExplanationError] = useState(false);
   const [explainingStep, setExplainingStep] = useState(false);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [isExplanationSaved, setIsExplanationSaved] = useState(false);
   const titleInputRef = useRef(null);
   const { generateStudySteps, explainStudyStep } = useGemini();
 
@@ -31,11 +33,11 @@ const StudyPlan = () => {
     }
   };
 
-  useEffect(() => { 
-    fetchPlans(); 
+  useEffect(() => {
+    fetchPlans();
     titleInputRef.current?.focus();
   }, []);
-  
+
   useEffect(() => {
     if (!selectedPlan?.steps) {
       setNodes([]);
@@ -123,6 +125,8 @@ const StudyPlan = () => {
 
     setSelectedStep(step);
     setStepExplanation("");
+    setExplanationError(false);
+    setIsExplanationSaved(false);
     setExplainingStep(true);
 
     try {
@@ -138,13 +142,30 @@ const StudyPlan = () => {
       );
 
       setStepExplanation(explanation);
+      setExplanationError(false);
     } catch (error) {
       console.error("Unable to generate study step explanation:", error);
       setStepExplanation(
         "Unable to generate an explanation right now. Please check your Gemini API key and try again."
       );
+      setExplanationError(true);
     } finally {
       setExplainingStep(false);
+    }
+  };
+
+  const saveExplanation = async () => {
+    if (!selectedStep || !stepExplanation || isExplanationSaved) return;
+
+    try {
+      await api.post("/api/resources/", {
+        title: selectedStep.description,
+        description: stepExplanation,
+        resource_type: "step_note",
+      });
+      setIsExplanationSaved(true);
+    } catch (error) {
+      console.error("Unable to save step explanation:", error);
     }
   };
 
@@ -245,8 +266,8 @@ const StudyPlan = () => {
                 key={plan.id}
                 onClick={() => setSelectedPlan(plan)}
                 className={`rounded-2xl border p-6 cursor-pointer relative group flex flex-col justify-between transition-all duration-200 ${selectedPlan?.id === plan.id
-                    ? "border-indigo-500/75 bg-indigo-500/[0.06] shadow-lg shadow-indigo-950/20"
-                    : "border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800/70"
+                  ? "border-indigo-500/75 bg-indigo-500/[0.06] shadow-lg shadow-indigo-950/20"
+                  : "border-slate-800 bg-slate-900 hover:border-slate-700 hover:bg-slate-800/70"
                   }`}
               >
                 <button
@@ -358,6 +379,7 @@ const StudyPlan = () => {
                           onClick={() => {
                             setSelectedStep(null);
                             setStepExplanation("");
+                            setIsExplanationSaved(false);
                           }}
                           className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer flex-shrink-0"
                           title="Close step"
@@ -383,27 +405,29 @@ const StudyPlan = () => {
                           </div>
                         </div>
                       ) : (
-                        <div className="prose prose-invert prose-sm max-w-none">
-                          {stepExplanation ? (
-                            <ReactMarkdown className="text-sm theme-scroll text-slate-300 leading-relaxed">
-                              {stepExplanation}
-                            </ReactMarkdown>
-                          ) : (
-                            <p className="text-sm text-slate-500">
-                              No explanation available.
-                            </p>
-                          )}
+                        <div className="prose prose-invert prose-sm max-w-none theme-scroll text-slate-300 leading-relaxed">
+                          {stepExplanation ? <ReactMarkdown>{stepExplanation}</ReactMarkdown> : <p className="text-sm text-slate-500">No explanation available.</p>}
                         </div>
                       )}
                     </div>
 
                     <div className="p-5 border-t border-slate-800">
+                      {stepExplanation && !explainingStep && (
+                        <button
+                          onClick={saveExplanation}
+                          disabled={explainingStep || !stepExplanation || isExplanationSaved || explanationError}
+                          className="w-full inline-flex mb-3 items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold border border-indigo-500/30 text-indigo-300 hover:bg-indigo-500/10 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          <FiBookmark size={16} />
+                          {isExplanationSaved ? "Saved to Resources" : "Save to Resources"}
+                        </button>
+                      )}
                       <button
                         onClick={toggleStepCompletion}
                         disabled={explainingStep}
                         className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${selectedStep.is_completed
-                            ? "bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 hover:bg-rose-500/10 hover:border-rose-400/30 hover:text-rose-300"
-                            : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-950/30"
+                          ? "bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 hover:bg-rose-500/10 hover:border-rose-400/30 hover:text-rose-300"
+                          : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-950/30"
                           }`}
                       >
                         <FiCheck size={16} />
