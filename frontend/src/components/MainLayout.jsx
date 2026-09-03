@@ -1,15 +1,8 @@
 import { useState } from "react";
 import { Outlet, NavLink, useLocation, Link } from "react-router-dom";
-import {
-  FiHome,
-  FiBook,
-  FiMessageSquare,
-  FiStar,
-  FiChevronLeft,
-  FiChevronRight,
-  FiUser,
-} from "react-icons/fi";
+import { FiHome, FiBook, FiMessageSquare, FiStar, FiChevronLeft, FiChevronRight, FiUser, FiClock, FiRotateCcw, FiCheck } from "react-icons/fi";
 import { HiShieldCheck } from "react-icons/hi"
+import { useFocusTimer } from "../context/FocusTimerContext";
 
 const MENU = [
   { path: "/user", label: "Dashboard", icon: <FiHome /> },
@@ -23,6 +16,12 @@ const MENU = [
 const MainLayout = () => {
   const [isOpen, setIsOpen] = useState(true);
   const location = useLocation();
+  const { duration, remaining, isRunning, start, pause, reset, finish, setDuration } = useFocusTimer();
+  const formatTime = (seconds) => {
+    const minutes = Math.floor(seconds / 60);
+    const secondsLeft = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(secondsLeft).padStart(2, "0")}`;
+  };
 
   const isExcludedRoute = location.pathname === "/user/ai-tutor" || location.pathname === "/user/resources";
 
@@ -110,12 +109,65 @@ const MainLayout = () => {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
-        <main
-          className={`flex-1 overflow-x-hidden bg-slate-950 ${
-            !isExcludedRoute ? "p-8" : ""
-          }`}
-        >
-          <Outlet />
+        <main className="flex-1 overflow-x-hidden bg-slate-950">
+          <div className="sticky top-0 z-10 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl px-6 py-3">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <FiClock className="text-indigo-400" />
+                <span className="text-sm font-semibold text-slate-300">Focus</span>
+                <span className="font-mono text-sm text-white">
+                  {formatTime(remaining)}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                {[5, 10, 15, 30, 60].map((minutes) => (
+                  <button
+                    key={minutes}
+                    onClick={() => setDuration(minutes * 60)}
+                    disabled={isRunning}
+                    className={`px-2 py-1 rounded-md text-[11px] font-medium transition-colors cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 ${
+                      duration === minutes * 60
+                        ? "bg-indigo-600/20 text-indigo-400 border border-indigo-500/30"
+                        : "text-slate-500 hover:text-slate-300 hover:bg-slate-800/60"
+                    }`}
+                  >
+                    {minutes}m
+                  </button>
+                ))}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={isRunning ? pause : start}
+                  disabled={remaining === 0}
+                  className="rounded-lg bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+                >
+                  {isRunning ? "Pause" : "Start"}
+                </button>
+
+                <button
+                  onClick={reset}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
+                  title="Reset timer"
+                >
+                  <FiRotateCcw size={15} />
+                </button>
+
+                {remaining < duration && (
+                  <button
+                    onClick={finish}
+                    className="flex items-center gap-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 text-xs font-semibold text-white transition-colors cursor-pointer"
+                  >
+                    <FiCheck />
+                    Finish
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className={`${!isExcludedRoute ? "p-8" : ""}`}>
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
