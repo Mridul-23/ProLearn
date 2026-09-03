@@ -10,9 +10,19 @@ export default function Footer() {
 
           {/* Brand */}
           <div className="md:col-span-2 space-y-4">
-            <span className="uppercase text-2xl logo-gradient font-bold font-sans tracking-tight text-white">
-              ProLearn
-            </span>
+            <div className="flex flex-col justify-center items-start group">
+              <div>
+              <span className="uppercase text-2xl logo-gradient font-bold font-sans tracking-tight">
+                ProLearn
+              </span>
+              <div className="flex items-center justify-center select-none uppercase tracking-widest text-[0.55rem] -mt-1 font-normal text-slate-400">
+                <span className="font-bold text-indigo-400">Pro</span>
+                fessional
+                <span className="font-bold text-indigo-400"> Learn</span>
+                ing
+              </div>
+              </div>
+            </div>
 
             <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
               A focused learning workspace for creating study plans,
@@ -66,6 +76,15 @@ export default function Footer() {
                   className="hover:text-indigo-400 transition-colors"
                 >
                   Features
+                </Link>
+              </li>
+
+              <li>
+                <Link
+                  to="/guidelines"
+                  className="hover:text-indigo-400 transition-colors"
+                >
+                  Guidelines
                 </Link>
               </li>
 
