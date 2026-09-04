@@ -8,7 +8,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         source="user.username"
     )
-    avatar = serializers.SerializerMethodField()
+    avatar = serializers.ImageField(required=False, allow_null=True)
     daily_focus = serializers.SerializerMethodField()
     focus_history = serializers.SerializerMethodField()
 
@@ -49,14 +49,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         return super().update(instance, validated_data)
 
-    def get_avatar(self, obj):
-        if not obj.avatar:
-            return None
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
 
-        request = self.context.get("request")
+        if instance.avatar:
+            data["avatar"] = instance.avatar.url
 
-        if request:
-            return request.build_absolute_uri(obj.avatar.url)
+        return data
 
     def get_daily_focus(self, obj):
         today = date.today().isoformat()
