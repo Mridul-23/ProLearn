@@ -3,13 +3,16 @@
 .env.*
 !.env.example
 
-# Python
+# Python and Django
 .venv/
 .ubuntuvenv
 venv/
 __pycache__/
 *.py[cod]
 *.sqlite3
+*.sqlite3.backup
+/backend/data.json
+/backend/media/
 
 # JavaScript and frontend builds
 node_modules/
@@ -28,6 +31,3 @@ yarn-error.log*
 Thumbs.db
 .idea/
 .vscode/
-
-# Other
-/backend/media/
