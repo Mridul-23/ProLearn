@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FiActivity, FiArrowRight, FiAward, FiBook, FiCheckCircle, FiMessageSquare, FiPlus, FiShield, FiTarget, FiSearch } from "react-icons/fi";
 import api from "../utils/api";
 
-const panel = "rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl p-6 shadow-sm shadow-slate-950/50";
+const panel = "rounded-2xl border border-slate-800/80 bg-slate-900/60 backdrop-blur-xl p-4 sm:p-6 shadow-sm shadow-slate-950/50";
 
 const getProgress = (plan) => {
   const total = plan.steps?.length || 0;
@@ -141,9 +141,21 @@ export default function Dashboard() {
               return (
                 <div key={plan.id} className="rounded-xl bg-slate-950/40 border border-slate-800/60 p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
-                    <div className="min-w-0 flex-1"><p className="font-medium text-sm text-slate-200 truncate">{plan.title}</p><p className="text-xs text-slate-500 mt-1">{progress.completed} / {progress.total} steps completed</p></div>
-                    <div className="w-full sm:w-44"><div className="h-1.5 rounded-full bg-slate-800 overflow-hidden"><div className="h-full rounded-full bg-indigo-500 transition-all duration-500" style={{ width: `${progress.percentage}%` }} /></div></div>
-                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:w-32"><span className={`text-xs font-semibold ${plan.is_completed ? "text-emerald-400" : "text-indigo-400"}`}>{plan.is_completed ? "Completed" : `${progress.percentage}%`}</span><Link to="/user/study-plan" className="text-xs text-slate-400 hover:text-white transition-colors">{plan.is_completed ? "View" : "Continue"} <FiArrowRight className="inline" /></Link></div>
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-sm text-slate-200 truncate">{plan.title}</p>
+                      <p className="text-xs text-slate-500 mt-1">{progress.completed} / {progress.total} steps completed</p>
+                    </div>
+                    <div className="w-full sm:w-44">
+                      <div className="h-1.5 rounded-full bg-slate-800 overflow-hidden">
+                        <div className="h-full rounded-full bg-indigo-500 transition-all duration-500" style={{ width: `${progress.percentage}%` }} />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between sm:justify-end gap-3 sm:w-32">
+                      <span className={`text-xs font-semibold ${plan.is_completed ? "text-emerald-400" : "text-indigo-400"}`}>{plan.is_completed ? "Completed" : `${progress.percentage}%`}
+                      </span>
+                      <Link to="/user/study-plan" className="inline-flex items-center gap-1 px-2 py-1 -mr-2 text-xs text-slate-400 hover:text-white transition-colors">{plan.is_completed ? "View" : "Continue"} <FiArrowRight className="inline" />
+                      </Link>
+                    </div>
                   </div>
                 </div>
               );
@@ -163,7 +175,7 @@ export default function Dashboard() {
         <div className={panel}>
           <h2 className="text-lg font-bold text-white tracking-tight">Quick Actions</h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-1 mb-5">Jump straight into your workspace.</p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link to="/user/study-plan" className="group rounded-xl border border-slate-800/70 bg-slate-950/40 p-4 hover:bg-slate-800/50 transition-colors"><FiPlus className="text-indigo-400 text-lg mb-3" /><p className="text-sm font-semibold text-slate-200">New Study Plan</p><p className="text-xs text-slate-500 mt-1">Build a roadmap</p></Link>
             <Link to="/user/ai-tutor" className="group rounded-xl border border-slate-800/70 bg-slate-950/40 p-4 hover:bg-slate-800/50 transition-colors"><FiMessageSquare className="text-cyan-400 text-lg mb-3" /><p className="text-sm font-semibold text-slate-200">AI Tutor</p><p className="text-xs text-slate-500 mt-1">Ask and learn</p></Link>
             <button

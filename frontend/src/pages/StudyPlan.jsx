@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { FiBook, FiPlus, FiTrash, FiMap, FiX, FiCheck, FiLoader, FiBookmark } from "react-icons/fi";
+import { FiBook, FiPlus, FiTrash, FiMap, FiX, FiCheck, FiLoader, FiBookmark, FiCornerDownLeft } from "react-icons/fi";
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState, MarkerType } from "reactflow";
 import api from "../utils/api";
 import { useGemini } from "../services/useGemini";
@@ -21,6 +21,7 @@ const StudyPlan = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isExplanationSaved, setIsExplanationSaved] = useState(false);
+  const [mobileView, setMobileView] = useState("roadmap");
   const titleInputRef = useRef(null);
   const { generateStudySteps, explainStudyStep } = useGemini();
 
@@ -124,6 +125,7 @@ const StudyPlan = () => {
     if (!step) return;
 
     setSelectedStep(step);
+    setMobileView("explanation");
     setStepExplanation("");
     setExplanationError(false);
     setIsExplanationSaved(false);
@@ -272,7 +274,7 @@ const StudyPlan = () => {
               >
                 <button
                   onClick={(e) => deletePlan(plan.id, e)}
-                  className="absolute top-4 right-4 p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 opacity-0 group-hover:opacity-100 transition-all z-10 cursor-pointer"
+                  className="absolute top-4 right-4 p-2 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 sm:opacity-0 sm:group-hover:opacity-100 transition-all z-10 cursor-pointer"
                   title="Delete plan"
                 >
                   <FiTrash size={16} />
@@ -312,7 +314,7 @@ const StudyPlan = () => {
 
       {selectedPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm">
-          <div className="bg-slate-900 w-full max-w-5xl h-[82vh] rounded-2xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden">
+          <div className="bg-slate-900 w-full max-w-5xl h-[92vh] sm:h-[82vh] rounded-2xl border border-slate-800 shadow-2xl flex flex-col overflow-hidden">
             <div className="px-5 sm:px-6 py-4 border-b border-slate-800 flex items-center justify-between bg-slate-900">
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
@@ -324,7 +326,13 @@ const StudyPlan = () => {
                 <p className="text-xs text-slate-400 mt-1 ml-10">Select a step to explore it with AI.</p>
               </div>
               <button
-                onClick={() => setSelectedPlan(null)}
+                onClick={() => {
+                  setSelectedPlan(null);
+                  setSelectedStep(null);
+                  setStepExplanation("");
+                  setIsExplanationSaved(false);
+                  setMobileView("roadmap");
+                }}
                 className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent hover:border-slate-700 transition-colors cursor-pointer flex-shrink-0"
                 title="Close roadmap"
               >
@@ -332,18 +340,24 @@ const StudyPlan = () => {
               </button>
             </div>
             <div className="flex-1 flex flex-col lg:flex-row min-h-0">
-              <div className="flex-1 bg-slate-950 relative min-h-[400px]">
+
+              {/* ReactFlow Roadmap */}
+              <div className={`${mobileView === "roadmap" ? "flex" : "hidden"} lg:flex flex-1 bg-slate-950 relative min-h-0`}>
                 <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onNodeClick={exploreStep} fitView>
                   <Background color="#1e293b" gap={32} size={1} />
                   <Controls className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden text-slate-200 fill-slate-200 shadow-lg m-3" />
                   <MiniMap
+                    className="hidden lg:block"
                     style={{ background: "#111827", border: "1px solid #334155", borderRadius: "10px" }}
                     nodeColor={(node) => (node.style?.background === "#064e3b" ? "#34d399" : "#6366f1")}
                     maskColor="rgba(15, 23, 42, 0.72)"
                   />
                 </ReactFlow>
               </div>
-              <aside className="w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-slate-800 bg-slate-900 flex flex-col min-h-[280px] lg:min-h-0">
+
+              {/* Explanation Panel */}
+              <aside className={`${mobileView === "explanation" ? "flex" : "hidden"} lg:flex w-full lg:w-[380px] border-t lg:border-t-0 lg:border-l border-slate-800 bg-slate-900 flex-col min-h-0`}>
+
                 {!selectedStep ? (
                   <div className="flex-1 flex items-center justify-center p-8 text-center">
                     <div>
@@ -356,36 +370,53 @@ const StudyPlan = () => {
                       </h3>
 
                       <p className="text-xs text-slate-400 mt-2 leading-relaxed">
-                        Select a step from the roadmap to get an
-                        AI-powered explanation.
+                        Select a step from the roadmap to get an AI-powered explanation.
                       </p>
                     </div>
                   </div>
                 ) : (
                   <>
                     <div className="px-5 py-4 border-b border-slate-800">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
+                      <div className="flex items-start gap-3">
+
+                        {/* Mobile Return */}
+                        <button
+                          onClick={() => {
+                            setSelectedStep(null);
+                            setStepExplanation("");
+                            setIsExplanationSaved(false);
+                            setMobileView("roadmap");
+                          }}
+                          className="lg:hidden p-1.5 bg-gradient-to-br from-slate-700/80 to-transparent rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer flex-shrink-0"
+                          title="Return to roadmap"
+                          aria-label="Return to roadmap"
+                        >
+                          <FiCornerDownLeft size={18} />
+                        </button>
+
+                        <div className="min-w-0 flex-1">
                           <p className="text-[11px] uppercase tracking-wider text-indigo-400 font-semibold">
                             Current Step
                           </p>
 
-                          <h3 className="text-base font-semibold text-white mt-1 leading-snug">
+                          <h3 className="text-base font-semibold text-white mt-1 leading-snug truncate" title={selectedStep.description}>
                             {selectedStep.description}
                           </h3>
                         </div>
 
+                        {/* Desktop Close Step */}
                         <button
                           onClick={() => {
                             setSelectedStep(null);
                             setStepExplanation("");
                             setIsExplanationSaved(false);
                           }}
-                          className="p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer flex-shrink-0"
+                          className="hidden lg:block p-1.5 rounded-lg text-slate-500 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer flex-shrink-0"
                           title="Close step"
                         >
                           <FiX size={16} />
                         </button>
+
                       </div>
                     </div>
 
@@ -422,24 +453,20 @@ const StudyPlan = () => {
                           {isExplanationSaved ? "Saved to Resources" : "Save to Resources"}
                         </button>
                       )}
+
                       <button
                         onClick={toggleStepCompletion}
                         disabled={explainingStep}
-                        className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${selectedStep.is_completed
-                          ? "bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 hover:bg-rose-500/10 hover:border-rose-400/30 hover:text-rose-300"
-                          : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-950/30"
-                          }`}
+                        className={`w-full inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${selectedStep.is_completed ? "bg-emerald-500/10 border border-emerald-400/30 text-emerald-300 hover:bg-rose-500/10 hover:border-rose-400/30 hover:text-rose-300" : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-950/30"}`}
                       >
                         <FiCheck size={16} />
-
-                        {selectedStep.is_completed
-                          ? "Mark as Incomplete"
-                          : "Mark as Completed"}
+                        {selectedStep.is_completed ? "Mark as Incomplete" : "Mark as Completed"}
                       </button>
                     </div>
                   </>
                 )}
               </aside>
+
             </div>
           </div>
         </div>

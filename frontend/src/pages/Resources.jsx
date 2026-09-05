@@ -170,7 +170,7 @@ const Resources = () => {
   };
 
   return (
-    <div className="min-h-[80vh] border border-slate-800 bg-slate-900 p-6 sm:p-7 font-poppins">
+    <div className="min-h-[80vh] border border-slate-800 bg-slate-900 p-4 sm:p-7 font-poppins">
       {/* Header */}
       <div className="mb-7">
         <h1 className="text-xl font-semibold text-slate-100">Resources</h1>
@@ -183,8 +183,8 @@ const Resources = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab ? "border-indigo-400 text-indigo-300" : "border-transparent text-slate-500 hover:text-slate-300"
-              }`}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-3 text-sm font-medium border-b-2 transition-colors capitalize ${activeTab === tab ? "border-indigo-400 text-indigo-300" : "border-transparent text-slate-500 hover:text-slate-300"
+          }`}
           >
             {tab === "storage" ? <FiArchive size={15} /> : <FiSearch size={15} />}
             {tab === "storage" ? "Stored Resources" : "Browse"}
@@ -221,7 +221,7 @@ const Resources = () => {
               return (
                 <div
                   key={resource.id}
-                  className="group flex items-center justify-between gap-4 px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 hover:bg-slate-950 transition-colors"
+                  className="group flex items-start justify-between gap-4 px-4 py-3.5 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 hover:bg-slate-950 transition-colors"
                 >
                   <div className="min-w-0">
                     {isNote ? (
@@ -315,7 +315,7 @@ const Resources = () => {
               </div>
               <div className="space-y-2">
                 {youtubeResults.map((item) => (
-                  <div key={item.id.videoId} className="flex items-center gap-4 p-4 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 transition-colors">
+                  <div key={item.id.videoId} className="flex items-start gap-3 sm:gap-4 p-4 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 transition-colors">
                     <div className="min-w-0 flex-1">
                       <a href={`https://www.youtube.com/watch?v=${item.id.videoId}`} target="_blank" rel="noopener noreferrer" className="block text-sm font-medium text-slate-200 hover:text-indigo-300 truncate transition-colors">
                         {item.snippet.title}
@@ -339,7 +339,7 @@ const Resources = () => {
               </div>
               <div className="space-y-2">
                 {mediumResults.map((item) => (
-                  <div key={item.id} className="flex items-center gap-4 p-4 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 transition-colors">
+                  <div key={item.id} className="flex items-start gap-4 p-4 rounded-xl bg-slate-950/50 border border-slate-800/70 hover:border-slate-700 transition-colors">
                     <div className="min-w-0 flex-1">
                       <a href={item.url} target="_blank" rel="noopener noreferrer" className="block text-sm font-medium text-slate-200 hover:text-indigo-300 truncate transition-colors">
                         {item.title}
@@ -418,7 +418,7 @@ const Resources = () => {
       {/* NOTE VIEW MODAL */}
       {selectedNote && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm" onClick={() => setSelectedNote(null)}>
-          <div className="w-full max-w-3xl max-h-[75vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-3xl max-h-[85vh] sm:max-h-[75vh] bg-slate-900 border border-slate-800 rounded-2xl shadow-2xl overflow-hidden" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between gap-4 px-5 py-4 border-b border-slate-800">
               <div className="min-w-0">
                 <p className="text-[10px] uppercase tracking-wider text-violet-400/80 font-semibold mb-1">
@@ -430,7 +430,7 @@ const Resources = () => {
                 <FiX size={18} />
               </button>
             </div>
-            <div className="p-6 overflow-y-auto theme-scroll max-h-[60vh] prose prose-invert prose-sm prose-slate max-w-none">
+            <div className="p-6 overflow-y-auto theme-scroll max-h-[70vh] sm:max-h-[60vh] prose prose-invert prose-sm prose-slate max-w-none">
               <ReactMarkdown>{selectedNote.description}</ReactMarkdown>
             </div>
           </div>

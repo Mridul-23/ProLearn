@@ -109,10 +109,10 @@ const AITutor = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-6rem)] bg-slate-900/60 backdrop-blur-xl text-slate-100 font-poppins overflow-hidden border border-slate-800/80 shadow-2xl">
+    <div className="flex flex-col h-[calc(100vh-7rem)] sm:h-[calc(100vh-6rem)] bg-slate-900/60 backdrop-blur-xl text-slate-100 font-poppins overflow-hidden border border-slate-800/80 shadow-2xl">
       
       {/* Header */}
-      <div className="bg-slate-950/60 p-4 border-b border-slate-800/80 flex items-center justify-between backdrop-blur-md">
+      <div className="bg-slate-950/60 p-3 sm:p-4 border-b border-slate-800/80 flex items-center justify-between backdrop-blur-md">
         <div className="flex gap-3 items-center">
         <div className="p-2.5 bg-indigo-600 rounded-xl shadow-lg shadow-indigo-600/30">
           <FiCpu className="text-xl text-white" />
@@ -124,16 +124,16 @@ const AITutor = () => {
           </p>
         </div>
         </div>
-        <button type="button" onClick={handleRefresh} className="group flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900/70 border border-slate-800 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 hover:border-indigo-500/30 active:scale-95 transition-all duration-200">
+        <button type="button" onClick={handleRefresh} className="group flex items-center gap-2 px-2.5 sm:px-3.5 py-2 rounded-xl bg-slate-900/70 border border-slate-800 text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800 hover:border-indigo-500/30 active:scale-95 transition-all duration-200">
           <FiRefreshCw className="text-indigo-400 transition-transform duration-500 group-hover:rotate-180" />
-          <span>Refresh Chat</span>
+          <span className="hidden sm:inline">Refresh Chat</span>
         </button>
       </div>
 
       {/* Chat Container */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-6 space-y-6 theme-scroll"
+        className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6 theme-scroll"
       >
         {messages.map((message, index) => (
           <motion.div
@@ -146,14 +146,14 @@ const AITutor = () => {
             }`}
           >
             <div
-              className={`max-w-[80%] rounded-2xl p-5 shadow-lg ${
+              className={`min-w-0 max-w-[92%] sm:max-w-[80%] rounded-2xl p-4 sm:p-5 shadow-lg ${
                 message.role === "user"
                   ? "bg-indigo-600 text-white rounded-br-sm shadow-indigo-600/10"
                   : "bg-slate-950/70 text-slate-200 border border-slate-800/80 rounded-bl-sm backdrop-blur-sm"
               }`}
             >
               {message.role === "assistant" ? (
-                <div className="prose prose-invert prose-sm max-w-none">
+                <div className="prose prose-invert break-words prose-sm max-w-none">
                   <ReactMarkdown
                     components={{
                       h1: ({ children }) => (
@@ -194,7 +194,7 @@ const AITutor = () => {
                             {children}
                           </code>
                         ) : (
-                          <pre className="bg-slate-950 border border-slate-800 rounded-xl p-3 overflow-x-auto my-2 theme-scroll">
+                          <pre className="bg-slate-950 border border-slate-800 break-words rounded-xl p-3 overflow-x-auto my-2 theme-scroll">
                             <code className="text-xs text-slate-200">
                               {children}
                             </code>
@@ -242,7 +242,7 @@ const AITutor = () => {
                   )}
                 </div>
               ) : (
-                <div className="whitespace-pre-wrap leading-relaxed text-white">
+                <div className="whitespace-pre-wrap break-words leading-relaxed text-white">
                   {message.content}
                 </div>
               )}
@@ -272,9 +272,9 @@ const AITutor = () => {
       {/* Input Form */}
       <form
         onSubmit={handleSend}
-        className="p-4 bg-slate-950/60 border-t border-slate-800/80 backdrop-blur-md"
+        className="p-3 sm:p-4 bg-slate-950/60 border-t border-slate-800/80 backdrop-blur-md"
       >
-        <div className="flex gap-3">
+        <div className="flex gap-2 sm:gap-3">
           <input
             ref={inputRef}
             type="text"

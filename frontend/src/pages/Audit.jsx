@@ -135,9 +135,9 @@ const Audit = () => {
                 <button
                   type="button"
                   onClick={() => toggleAudit(audit.id)}
-                  className="w-full px-5 py-4 flex items-center justify-between gap-4 text-left hover:bg-slate-800/40 transition-colors"
+                  className="w-full px-4 sm:px-5 py-4 flex items-center justify-between gap-3 sm:gap-4 text-left hover:bg-slate-800/40 transition-colors"
                 >
-                  <div className="flex items-center gap-4 min-w-0">
+                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 shrink-0">
                       <FiCpu className="text-indigo-400" />
                     </div>
@@ -173,7 +173,7 @@ const Audit = () => {
 
                 {/* Details */}
                 {isExpanded && (
-                  <div className="border-t border-slate-800 px-5 py-5 space-y-5">
+                  <div className="border-t border-slate-800 px-4 sm:px-5 py-5 space-y-5">
                     {/* Prompt */}
                     <section>
                       <div className="flex items-center gap-2 mb-2">
@@ -185,7 +185,7 @@ const Audit = () => {
                       </div>
 
                       <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-                        <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+                        <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap break-words">
                           {audit.prompt}
                         </p>
                       </div>
@@ -202,7 +202,7 @@ const Audit = () => {
                       </div>
 
                       <div className="rounded-xl border border-slate-800 bg-slate-950/70 p-4">
-                        <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap">
+                        <p className="text-sm leading-relaxed text-slate-300 whitespace-pre-wrap break-words">
                           {audit.ai_response}
                         </p>
                       </div>

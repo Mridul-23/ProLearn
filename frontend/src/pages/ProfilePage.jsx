@@ -191,7 +191,7 @@ const handleChangePassword = async () => {
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
 
       {/* Profile Section */}
-      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
+      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-2xl">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-white tracking-wide">
             Profile
@@ -202,7 +202,7 @@ const handleChangePassword = async () => {
         </div>
 
         <form onSubmit={handleSaveProfile}>
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-8">
 
             {/* Avatar Upload Container */}
             <div className="flex flex-col items-center gap-3">
@@ -289,7 +289,7 @@ const handleChangePassword = async () => {
       </section>
 
       {/* Security Section */}
-      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
+      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-2xl">
         <div className="mb-6">
           <h2 className="text-xl font-bold text-white tracking-wide">
             Security
@@ -414,7 +414,7 @@ const handleChangePassword = async () => {
       </section>
 
       {/* Gemini Section */}
-      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-6 shadow-2xl">
+      <section className="bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl p-4 sm:p-6 shadow-2xl">
         <div className="flex items-start gap-4 mb-6">
           <div className="p-2.5 rounded-xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/20">
             <FiKey className="text-xl" />
@@ -445,12 +445,12 @@ const handleChangePassword = async () => {
               Your key is kept locally in this browser session and is never stored on the ProLearn backend servers.
             </p>
 
-            <div className="flex gap-2.5 shrink-0 w-full sm:w-auto justify-end">
+            <div className="flex gap-2.5 w-full sm:w-auto">
               <button
                 type="button"
                 onClick={clearGeminiKey}
                 disabled={!geminiKey}
-                className="px-4 py-2 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-sm font-medium text-slate-200 disabled:opacity-40 transition-all"
+                className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-slate-950/60 hover:bg-slate-800 border border-slate-800 text-sm font-medium text-slate-200 disabled:opacity-40 transition-all"
               >
                 Clear
               </button>
@@ -458,7 +458,7 @@ const handleChangePassword = async () => {
               <button
                 type="button"
                 onClick={handleSaveGeminiKey}
-                className="flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm text-white font-medium transition-all shadow-lg shadow-indigo-600/20"
+                className="flex-1 sm:flex-none flex items-center gap-2 px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-sm text-white font-medium transition-all shadow-lg shadow-indigo-600/20"
               >
                 <FiKey />
                 Save key
@@ -467,7 +467,7 @@ const handleChangePassword = async () => {
           </div>
 
           <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-4 py-3">
-            <p className="text-xs text-amber-300/90 font-medium">
+            <p className="text-xs text-amber-300/90 leading-relaxed font-medium">
               🔒 BYOK Security: ProLearn does not receive or log your Gemini API key. All generations execute securely from your client browser session.
             </p>
           </div>
@@ -476,7 +476,7 @@ const handleChangePassword = async () => {
 
       {/* Status Message Banner */}
       {message && (
-        <div className="rounded-xl border border-slate-800 bg-slate-900/80 backdrop-blur-md px-5 py-4 text-sm text-slate-200 shadow-xl flex items-center justify-between animate-fadeIn">
+        <div className="rounded-xl border border-slate-800 bg-slate-900/80 backdrop-blur-md px-4 sm:px-5 py-4 text-sm text-slate-200 shadow-xl animate-fadeIn">
           <span>{message}</span>
         </div>
       )}
