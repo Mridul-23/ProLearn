@@ -6,7 +6,8 @@ class Resource(models.Model):
         ('video', 'Video'),
         ('article', 'Article'),
         ('ai_note', 'AI Note'),
-        ('user_note', 'User Note')
+        ('user_note', 'User Note'),
+        ('step_note', 'Step Note'),
     ]
 
     title = models.CharField(max_length=255)

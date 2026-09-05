@@ -1,6 +1,7 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import api, { clearAuthTokens } from "../utils/api";
 import { useGeminiKey } from "./GeminiKeyContext";
+import { useChat } from "./ChatContext";
 
 export const AuthContext = createContext();
 
@@ -8,12 +9,14 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const { clearGeminiKey } = useGeminiKey();
+  const { refreshChat } = useChat();
 
   const logout = useCallback(() => {
     clearAuthTokens();
     clearGeminiKey();
+    refreshChat();
     setUser(null);
-  }, [clearGeminiKey]);
+  }, [clearGeminiKey, refreshChat]);
 
   useEffect(() => {
     let isMounted = true;
@@ -38,7 +41,9 @@ export const AuthProvider = ({ children }) => {
     };
 
     const handleSessionExpired = () => {
+      clearAuthTokens();
       clearGeminiKey();
+      refreshChat();
       if (isMounted) setUser(null);
     };
 
@@ -49,7 +54,7 @@ export const AuthProvider = ({ children }) => {
       isMounted = false;
       window.removeEventListener("auth:logout", handleSessionExpired);
     };
-  }, [logout, clearGeminiKey]);
+  }, [logout, clearGeminiKey, refreshChat]);
 
   const login = async (username, password) => {
     try {

@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import {
   BrowserRouter as Router,
   Navigate,
@@ -23,6 +23,8 @@ import ProfilePage from './pages/ProfilePage';
 
 import { AuthContext } from './context/AuthContext';
 import './App.css';
+import Audit from './pages/Audit';
+import GuidelinesPage from './pages/GuidelinesPage';
 
 function RequireAuth({ children }) {
   const { user, loading } = useContext(AuthContext);
@@ -43,9 +45,20 @@ function RequireAuth({ children }) {
   return children;
 }
 
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
+
 export default function App() {
   return (
     <Router>
+      <ScrollToTop />
       <div className="min-h-screen flex flex-col">
         <Navbar />
 
@@ -53,7 +66,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/features" element={<FeaturesPage />} />
-
+            <Route path="/guidelines" element={<GuidelinesPage />} />
             <Route
               path="/user"
               element={
@@ -67,6 +80,7 @@ export default function App() {
               <Route path="resources" element={<Resources />} />
               <Route path="ai-tutor" element={<AITutor />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path='audit' element={<Audit />} />
             </Route>
 
             <Route path="/login" element={<LoginPage />} />

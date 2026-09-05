@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useContext, useState } from 'react';
 import { AuthContext } from '../context/AuthContext';
+import { LuBookOpenCheck, LuLightbulb, LuLogIn, LuUserPlus } from 'react-icons/lu';
 import { FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 import './component.css';
 
@@ -27,20 +28,30 @@ export default function Navbar() {
             to="/"
             className="flex flex-col justify-center items-start group"
           >
-            <span className="uppercase text-2xl logo-gradient font-bold font-sans tracking-tight">
-              ProLearn
-            </span>
-            <div className="select-none uppercase tracking-widest text-[0.5rem] -mt-1 font-normal text-slate-400">
-              <span className="font-bold text-indigo-400">Pro</span>
-              fessional
-              <span className="font-bold text-indigo-400"> Learn</span>
-              ing
+            <div>
+              <span className="uppercase text-2xl logo-gradient font-bold font-sans tracking-tight">
+                ProLearn
+              </span>
+              <div className="select-none uppercase tracking-widest text-[0.55rem] -mt-1 font-normal text-slate-400">
+                <span className="font-bold text-indigo-400">Pro</span>
+                fessional
+                <span className="font-bold text-indigo-400"> Learn</span>
+                ing
+              </div>
             </div>
           </Link>
 
           {/* ================= LOGGED IN ================= */}
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              {/* Guidelines */}
+              <Link
+                to="/guidelines"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-indigo-400 hover:bg-slate-900 transition-all"
+              >
+                <LuBookOpenCheck className="text-base" />
+                <span>Guidelines</span>
+              </Link>
               {/* Profile */}
               <Link
                 to="/user/profile"
@@ -81,26 +92,37 @@ export default function Navbar() {
           ) : (
             <>
               {/* ================= LOGGED OUT (Desktop) ================= */}
-              <div className="hidden sm:flex items-center gap-8">
+              <div className="hidden sm:flex items-center gap-4">
                 <Link
                   to="/features"
-                  className="text-sm font-medium text-slate-300 hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-indigo-400 hover:bg-slate-900 transition-all"
                 >
-                  Features
+                  <LuLightbulb className="text-base" />
+                  <span>Features</span>
+                </Link>
+
+                <Link
+                  to="/guidelines"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-indigo-400 hover:bg-slate-900 transition-all"
+                >
+                  <LuBookOpenCheck className="text-base" />
+                  <span>Guidelines</span>
                 </Link>
 
                 <Link
                   to="/login"
-                  className="text-sm font-medium text-slate-300 hover:text-indigo-400 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-indigo-400 hover:bg-slate-900 transition-all"
                 >
-                  Login
+                  <LuLogIn className="text-base" />
+                  <span>Login</span>
                 </Link>
 
                 <Link
                   to="/signup"
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-5 py-2.5 rounded-xl text-sm font-medium shadow-lg shadow-indigo-600/20 transition-all"
+                  className="flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium text-slate-300 hover:text-indigo-400 hover:bg-slate-900 transition-all"
                 >
-                  Sign Up
+                  <LuUserPlus className="text-base" />
+                  <span>Sign Up</span>
                 </Link>
               </div>
 
@@ -124,23 +146,34 @@ export default function Navbar() {
           <Link
             to="/features"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-900 hover:text-white"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-900 hover:text-white"
           >
-            Features
+            <LuLightbulb className="text-base" />
+            <span>Features</span>
+          </Link>
+          <Link
+            to="/guidelines"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-900 hover:text-white"
+          >
+            <LuBookOpenCheck className="text-base" />
+            <span>Guidelines</span>
           </Link>
           <Link
             to="/login"
             onClick={() => setMobileMenuOpen(false)}
-            className="block px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-900 hover:text-white"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-900 hover:text-white"
           >
-            Login
+            <LuLogIn className="text-base" />
+            <span>Login</span>
           </Link>
           <Link
             to="/signup"
             onClick={() => setMobileMenuOpen(false)}
-            className="block w-full text-center bg-indigo-600 text-white px-4 py-2.5 rounded-xl font-medium shadow-md"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-base font-medium text-slate-300 hover:bg-slate-900 hover:text-white"
           >
-            Sign Up
+            <LuUserPlus className="text-base" />
+            <span>Sign Up</span>
           </Link>
         </div>
       )}

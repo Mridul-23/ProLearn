@@ -1,14 +1,14 @@
 from rest_framework import serializers
-from .models import UserProfile
+from django.contrib.auth.models import User
+from .models import UserProfile, Audit
 from datetime import date
 import math
 
 class UserProfileSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
-        source="user.username",
-        read_only=True
+        source="user.username"
     )
-    avatar = serializers.SerializerMethodField()
+    avatar = serializers.ImageField(required=False, allow_null=True)
     daily_focus = serializers.SerializerMethodField()
     focus_history = serializers.SerializerMethodField()
 
@@ -23,14 +23,39 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "focus_history",
         ]
 
-    def get_avatar(self, obj):
-        if not obj.avatar:
-            return None
+    def validate_username(self, value):
+        value = value.strip()
 
-        request = self.context.get("request")
+        if not value:
+            raise serializers.ValidationError("Username cannot be empty.")
 
-        if request:
-            return request.build_absolute_uri(obj.avatar.url)
+        user = self.instance.user
+
+        if User.objects.filter(username=value).exclude(
+            pk=user.pk
+        ).exists():
+            raise serializers.ValidationError(
+                "Username already exists."
+            )
+
+        return value
+
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop("user", {})
+
+        if "username" in user_data:
+            instance.user.username = user_data["username"]
+            instance.user.save(update_fields=["username"])
+
+        return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.avatar:
+            data["avatar"] = instance.avatar.url
+
+        return data
 
     def get_daily_focus(self, obj):
         today = date.today().isoformat()
@@ -52,3 +77,17 @@ class UserProfileSerializer(serializers.ModelSerializer):
             ]
 
         return []
+class AuditSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Audit
+        fields = [
+            "id",
+            "timestamp",
+            "source",
+            "prompt",
+            "ai_response",
+        ]
+        read_only_fields = [
+            "id",
+            "timestamp",
+        ]

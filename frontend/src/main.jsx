@@ -5,13 +5,19 @@ import App from './App.jsx';
 
 import { AuthProvider } from './context/AuthContext';
 import { GeminiKeyProvider } from './context/GeminiKeyContext';
+import { ChatProvider } from './context/ChatContext.jsx';
+import { FocusTimerProvider } from './context/FocusTimerContext.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GeminiKeyProvider>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <ChatProvider>
+        <AuthProvider>
+          <FocusTimerProvider>
+            <App />
+          </FocusTimerProvider>
+        </AuthProvider>
+      </ChatProvider>
     </GeminiKeyProvider>
   </StrictMode>,
 );

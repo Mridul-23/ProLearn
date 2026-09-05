@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from .models import UserProfile
-from .serializers import UserProfileSerializer
+from .models import UserProfile, Audit
+from .serializers import UserProfileSerializer, AuditSerializer
 
 class SignupView(APIView):
   permission_classes = [AllowAny]
@@ -50,6 +50,39 @@ class LoginView(APIView):
       }, status=status.HTTP_200_OK)
     
     return Response({"error": "Username or password is incorrect"}, status=status.HTTP_401_UNAUTHORIZED)
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        current_password = request.data.get("current_password")
+        new_password = request.data.get("new_password")
+
+        if not current_password or not new_password:
+            return Response(
+                {"error": "Current password and new password are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if not request.user.check_password(current_password):
+            return Response(
+                {"error": "Current password is incorrect"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if current_password == new_password:
+            return Response(
+                {"error": "New password must be different from the current password"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        request.user.set_password(new_password)
+        request.user.save()
+
+        return Response(
+            {"message": "Password changed successfully"},
+            status=status.HTTP_200_OK
+        )
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -120,3 +153,25 @@ class FocusTimeView(APIView):
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
             return Response({"error": "Profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+class AuditView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        audits = Audit.objects.filter(user=request.user)
+        serializer = AuditSerializer(
+            audits,
+            many=True
+        )
+        return Response(serializer.data)
+    
+    def post(self, request):
+        serializer = AuditSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(user=request.user)
+
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED
+        )
+    
