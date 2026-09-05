@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://prolearn-gvpn.onrender.com',
+  baseURL: import.meta.env.VITE_API_URL,
 });
 
 const ACCESS_TOKEN_KEY = 'access_token';
