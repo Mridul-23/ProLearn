@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /user/
+
+Sitemap: https://prolearn-phi.vercel.app/sitemap.xml
