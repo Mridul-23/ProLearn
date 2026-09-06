@@ -7,6 +7,7 @@ import {
   useLocation,
 } from 'react-router-dom';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -101,6 +102,7 @@ export default function App() {
         <Footer />
       </div>
       <SpeedInsights />
+      <Analytics />
     </Router>
   );
 }
